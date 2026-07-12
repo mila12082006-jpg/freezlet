@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>freezlet</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+        <style>
+            /* Базовые стили */
+            .word-list { max-height: 400px; overflow-y: auto; }
+            .word-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f9f9f9; border-radius: 8px; margin-bottom: 8px; gap: 10px; }
+            .word-item .word-main { flex: 1; min-width: 0; }
+            .word-item .word { font-weight: 600; color: #667eea; font-size: 15px; }
+            .word-item .transcription { color: #999; font-size: 13px; font-style: italic; margin-left: 6px; }
+            .word-item .translation { color: #666; margin-left: 10px; font-size: 14px; }
+            .word-item .actions { display: flex; gap: 5px; flex-shrink: 0; }
+            .word-item .action-btn { background: #667eea; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
+            .word-item .action-btn.delete { background: #ff4757; }
+            .word-item .action-btn.speak { background: #51cf66; }
+            .empty { text-align: center; padding: 40px; color: #999; }
+            
+            body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-family: 'Arial', sans-serif; margin: 0; padding: 20px; }
+            .container { max-width: 700px; margin: 0 auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+            .tabs { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 10px; flex-wrap: wrap; }
+            h1 { text-align: center; color: #667eea; margin-bottom: 25px; font-family: 'Verdana', sans-serif; }
+            
+            button { background: none; border: none; padding: 12px 20px; cursor: pointer; font-size: 16px; color: #888; border-bottom: 3px solid transparent; transition: all 0.3s; }
+            button.primary { background: #667eea; color: white; border: none; padding: 12px 24px; border-radius: 10px; font-size: 15px; cursor: pointer; width: 100%; margin-top: 15px; }
+            
+            .card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 50px 30px; border-radius: 15px; text-align: center; min-height: 200px; display: flex; flex-direction: column; justify-content: center; cursor: pointer; margin-bottom: 20px; transition: transform 0.3s; position: relative; }
+            .card:hover { transform: scale(1.02); }
+            .card .front { font-size: 28px; font-weight: 600; }
+            .card .back { font-size: 22px; margin-top: 15px; opacity: 0.9; }
+            .card .speak-btn { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 18px; }
+            .card .speak-btn:hover { background: rgba(255,255,255,0.3); }
+            
+            .actions { display: flex; gap: 10px; }
+            .actions button { flex: 1; padding: 15px; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; font-weight: 600; }
+            .btn-fail { background: #ff6b6b; color: white; }
+            .btn-success { background: #51cf66; color: white; }
+            
+            button.primary:hover { background: #5568d3; }
+            button:hover { color: #667eea; }
+            
+            .hint { background: #f5f5ff; padding: 12px; border-radius: 8px; font-size: 13px; color: #666; margin: 10px 0; }
+            
+            textarea { width: 100%; padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; font-family: monospace; resize: vertical; box-sizing: border-box; }
+            textarea:focus { outline: none; border-color: #667eea; }
+            
+            h2 { color: #333; margin-bottom: 15px; }
+            
+            .progress { text-align: center; color: #888; margin-bottom: 15px; font-size: 14px; }
+            .progress-bar { height: 6px; background: #eee; border-radius: 3px; overflow: hidden; margin-bottom: 20px; }
+            .progress-fill { height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); transition: width 0.3s; }
+            
+            .test-menu { display: flex; flex-direction: column; gap: 12px; }
+            .test-option { background: #f5f5ff; padding: 20px; border-radius: 12px; cursor: pointer; transition: all 0.3s; border: 2px solid transparent; text-align: left; width: 100%; color: #333; font-size: 15px; }
+            .test-option:hover { border-color: #667eea; background: #eeeaff; }
+            .test-option .title { font-weight: 600; color: #667eea; margin-bottom: 5px; }
+            .test-option .desc { font-size: 13px; color: #666; }
+            
+            .options { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+            .option-btn { background: white; border: 2px solid #e0e0e0; padding: 15px; border-radius: 10px; cursor: pointer; font-size: 16px; text-align: left; transition: all 0.2s; color: #333; position: relative; padding-right: 50px; }
+            .option-btn:hover { border-color: #667eea; background: #f5f5ff; }
+            .option-btn.correct { background: #d4edda; border-color: #51cf66; color: #155724; }
+            .option-btn.wrong { background: #f8d7da; border-color: #ff6b6b; color: #721c24; }
+            .option-btn .speak-btn { position: absolute; top: 50%; right: 10px; transform: translateY(-50%); background: #667eea; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 14px; }
+            
+            .answer-input { width: 100%; padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 18px; text-align: center; margin: 20px 0; box-sizing: border-box; }
+            .answer-input:focus { outline: none; border-color: #667eea; }
+            .answer-input.correct { border-color: #51cf66; background: #d4edda; }
+            .answer-input.wrong { border-color: #ff6b6b; background: #f8d7da; }
+            
+            .feedback { text-align: center; padding: 15px; border-radius: 10px; margin-top: 15px; font-weight: 600; }
+            .feedback.correct { background: #d4edda; color: #155724; }
+            .feedback.wrong { background: #f8d7da; color: #721c24; }
+            
+            .results { text-align: center; padding: 30px; }
+            .results .score { font-size: 48px; font-weight: 700; color: #667eea; margin: 20px 0; }
+            .results .label { color: #666; font-size: 16px; }
+            
+            .set-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+            .set-item { background: #f9f9f9; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.2s; border: 2px solid transparent; }
+            .set-item:hover { border-color: #667eea; background: #f5f5ff; }
+            .set-item.active { border-color: #667eea; background: #eeeaff; }
+            .set-item .set-info { flex: 1; }
+            .set-item .set-name { font-weight: 600; color: #333; font-size: 16px; }
+            .set-item .set-count { color: #888; font-size: 13px; margin-top: 3px; }
+            .set-item .set-actions { display: flex; gap: 8px; }
+            .set-item .set-btn { background: #667eea; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+            .set-item .set-btn.delete { background: #ff4757; }
+            
+            .set-input { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px; margin-bottom: 10px; box-sizing: border-box; }
+            .set-input:focus { outline: none; border-color: #667eea; }
+            
+            .active-set-badge { background: #667eea; color: white; padding: 6px 12px; border-radius: 20px; font-size: 13px; display: inline-block; margin-bottom: 15px; }
+            
+            .edit-input { padding: 8px; border: 2px solid #667eea; border-radius: 5px; font-size: 14px; margin-right: 5px; }
+            
+            .lang-selector { display: flex; gap: 10px; margin-bottom: 15px; }
+            .lang-option { flex: 1; padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; text-align: center; transition: all 0.2s; background: white; font-size: 15px; }
+            .lang-option:hover { border-color: #667eea; }
+            .lang-option.selected { border-color: #667eea; background: #eeeaff; font-weight: 600; }
+            .lang-option .flag { font-size: 24px; display: block; margin-bottom: 5px; }
+            
+            .import-sources { display: flex; gap: 10px; margin-bottom: 15px; }
+            .source-btn { flex: 1; padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; text-align: center; transition: all 0.2s; background: white; font-size: 14px; color: #333; }
+            .source-btn:hover { border-color: #667eea; background: #f5f5ff; }
+            .source-btn.active { border-color: #667eea; background: #eeeaff; font-weight: 600; }
+            .source-btn .icon { font-size: 24px; display: block; margin-bottom: 5px; }
+            
+            .pdf-drop-zone { border: 2px dashed #667eea; border-radius: 10px; padding: 30px; text-align: center; background: #f5f5ff; cursor: pointer; transition: all 0.2s; margin-bottom: 15px; }
+            .pdf-drop-zone:hover { background: #eeeaff; }
+            .pdf-drop-zone .icon { font-size: 40px; margin-bottom: 10px; }
+            .pdf-drop-zone .text { color: #666; font-size: 14px; }
+            .pdf-drop-zone .filename { color: #667eea; font-weight: 600; margin-top: 10px; }
+            
+            .pdf-loading { text-align: center; padding: 20px; color: #667eea; }
+            .pdf-loading .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #eee; border-top-color: #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 10px; vertical-align: middle; }
+            @keyframes spin { to { transform: rotate(360deg); } }
+            
+            /* ========== АДАПТИВНОСТЬ ========== */
+            
+            /* Планшеты и большие телефоны (до 768px) */
+            @media (max-width: 768px) {
+                body { padding: 10px; }
+                .container { padding: 20px; border-radius: 15px; }
+                h1 { font-size: 24px; margin-bottom: 20px; }
+                h2 { font-size: 18px; }
+                
+                /* Вкладки в два ряда на планшетах */
+                .tabs { gap: 5px; }
+                .tabs button { padding: 10px 15px; font-size: 14px; }
+                
+                /* Карточки меньше */
+                .card { padding: 30px 20px; min-height: 150px; }
+                .card .front { font-size: 24px; }
+                .card .back { font-size: 18px; }
+                
+                /* Кнопки действий больше для пальцев */
+                .actions button { padding: 12px; font-size: 15px; }
+                
+                /* Список слов */
+                .word-item { padding: 10px; }
+                .word-item .word { font-size: 14px; }
+                .word-item .translation { font-size: 13px; display: block; margin-left: 0; margin-top: 3px; }
+                .word-item .actions { flex-direction: column; gap: 3px; }
+                .word-item .action-btn { padding: 6px 8px; font-size: 11px; }
+                
+                /* Сеты */
+                .set-item { padding: 12px; }
+                .set-item .set-name { font-size: 15px; }
+                .set-item .set-actions { flex-direction: column; gap: 5px; }
+                
+                /* Тесты */
+                .test-option { padding: 15px; }
+                .option-btn { padding: 12px; font-size: 15px; }
+                
+                /* Результаты */
+                .results .score { font-size: 36px; }
+            }
+            
+            /* Телефоны (до 480px) */
+            @media (max-width: 480px) {
+                body { padding: 5px; }
+                .container { padding: 15px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+                h1 { font-size: 20px; margin-bottom: 15px; }
+                h2 { font-size: 16px; margin-bottom: 10px; }
+                
+                /* Вкладки компактные */
+                .tabs { gap: 3px; margin-bottom: 15px; padding-bottom: 8px; }
+                .tabs button { padding: 8px 10px; font-size: 12px; flex: 1; min-width: 0; white-space: nowrap; }
+                
+                /* Карточки */
+                .card { padding: 25px 15px; min-height: 120px; margin-bottom: 15px; }
+                .card .front { font-size: 20px; }
+                .card .back { font-size: 16px; margin-top: 10px; }
+                .card .speak-btn { top: 10px; right: 10px; padding: 6px 10px; font-size: 16px; }
+                
+                /* Кнопки действий */
+                .actions { gap: 8px; }
+                .actions button { padding: 10px; font-size: 14px; }
+                
+                /* Список слов - вертикальная компоновка */
+                .word-item { flex-direction: column; align-items: flex-start; gap: 8px; }
+                .word-item .word-main { width: 100%; }
+                .word-item .word { font-size: 15px; display: block; }
+                .word-item .transcription { display: block; margin-left: 0; margin-top: 2px; font-size: 12px; }
+                .word-item .translation { display: block; margin-left: 0; margin-top: 3px; font-size: 13px; }
+                .word-item .actions { width: 100%; justify-content: flex-end; flex-direction: row; }
+                .word-item .action-btn { padding: 8px 12px; font-size: 12px; }
+                
+                /* Редактирование слов */
+                .edit-input { width: 100%; margin-right: 0; margin-bottom: 5px; font-size: 13px; }
+                
+                /* Сеты */
+                .set-item { flex-direction: column; align-items: flex-start; gap: 10px; }
+                .set-item .set-info { width: 100%; }
+                .set-item .set-name { font-size: 14px; }
+                .set-item .set-count { font-size: 12px; }
+                .set-item .set-actions { width: 100%; justify-content: flex-end; flex-direction: row; }
+                .set-item .set-btn { padding: 8px 12px; font-size: 11px; }
+                
+                /* Поля ввода */
+                textarea { font-size: 13px; padding: 12px; }
+                .set-input { font-size: 14px; padding: 10px; }
+                
+                /* Языки */
+                .lang-selector { gap: 8px; }
+                .lang-option { padding: 12px; font-size: 13px; }
+                .lang-option .flag { font-size: 20px; }
+                
+                /* Импорт */
+                .import-sources { gap: 8px; }
+                .source-btn { padding: 12px; font-size: 13px; }
+                .source-btn .icon { font-size: 20px; }
+                
+                /* PDF */
+                .pdf-drop-zone { padding: 20px; }
+                .pdf-drop-zone .icon { font-size: 30px; }
+                .pdf-drop-zone .text { font-size: 13px; }
+                
+                /* Тесты */
+                .test-option { padding: 12px; font-size: 14px; }
+                .test-option .title { font-size: 14px; }
+                .test-option .desc { font-size: 12px; }
+                .option-btn { padding: 10px; font-size: 14px; padding-right: 45px; }
+                .option-btn .speak-btn { padding: 4px 8px; font-size: 12px; }
+                
+                .answer-input { font-size: 16px; padding: 12px; }
+                
+                /* Результаты */
+                .results { padding: 20px; }
+                .results .score { font-size: 32px; margin: 15px 0; }
+                .results .label { font-size: 14px; }
+                
+                /* Прогресс */
+                .progress { font-size: 13px; margin-bottom: 10px; }
+                .progress-bar { height: 5px; }
+                
+                /* Подсказки */
+                .hint { padding: 10px; font-size: 12px; }
+                
+                /* Бейдж */
+                .active-set-badge { font-size: 12px; padding: 5px 10px; }
+            }
+            
+            /* Очень маленькие экраны (до 360px) */
+            @media (max-width: 360px) {
+                .container { padding: 10px; }
+                h1 { font-size: 18px; }
+                .tabs button { font-size: 11px; padding: 6px 8px; }
+                .card .front { font-size: 18px; }
+                .card .back { font-size: 14px; }
+                .actions button { font-size: 13px; padding: 8px; }
+            }
+        </style>
+    </head>
+    
+    <body>
+        <div class="container">
+            <h1>Freezlet</h1>
+            
+            <div class="tabs">
+                <button onclick="showScreen('sets')">📚 Сеты</button>
+                <button onclick="showScreen('import')">📥 Импорт</button>
+                <button onclick="showScreen('list')">📋 Список</button>
+                <button onclick="showScreen('train')">🎴 Тренировка</button>
+                <button onclick="showScreen('test')">📝 Тест</button>
+            </div>
+            
+            <div id="sets"><h2>Твои сеты</h2><div id="setsContent"></div></div>
+            <div id="import"><h2>Импорт слов</h2><div id="importContent"></div></div>
+            <div id="list"><h2>Список слов</h2><div id="listContent"></div></div>
+            <div id="train"><h2>Тренировка</h2><div id="trainContent"></div></div>
+            <div id="test"><h2>Тест</h2><div id="testContent"></div></div>
+        </div>
+        
+        <script>
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            
+            let sets = [];
+            let activeSetId = null;
+            let newSetLang = 'en';
+            let importSource = 'text';
+            let extractedPdfText = '';
+            
+            let trainQueue = [];
+            let trainIndex = 0;
+            
+            let testPassed = 0;
+            let testTotal = 10;
+            let testCorrect = 0;
+            let currentTestType = null;
+            let currentQuestion = null;
+            let answered = false;
+            
+            const LANGS = {
+                'en': { flag: '🇬🇧', name: 'Английский', code: 'en-US' },
+                'de': { flag: '🇩🇪', name: 'Немецкий', code: 'de-DE' }
+            };
+            
+            const saved = localStorage.getItem('sets');
+            if (saved) {
+                sets = JSON.parse(saved);
+                sets.forEach(s => { 
+                    if (!s.lang) s.lang = 'en';
+                    if (s.words) s.words.forEach(w => { if (!w.transcription) w.transcription = ''; });
+                });
+                if (sets.length > 0) activeSetId = sets[0].id;
+            }
+            
+            function parseLine(line) {
+                line = line.trim();
+                if (!line) return null;
+                
+                let transcription = '';
+                let cleanLine = line;
+                
+                const bracketMatch = line.match(/\[([^\]]+)\]/);
+                if (bracketMatch) {
+                    transcription = bracketMatch[1].trim();
+                    cleanLine = line.replace(bracketMatch[0], ' ').replace(/\s+/g, ' ').trim();
+                } else {
+                    const slashMatch = line.match(/\/([^\/]+)\//);
+                    if (slashMatch) {
+                        transcription = slashMatch[1].trim();
+                        cleanLine = line.replace(slashMatch[0], ' ').replace(/\s+/g, ' ').trim();
+                    }
+                }
+                
+                let separator = null;
+                const separators = [' - ', ' — ', ', ', ': ', ' = ', '\t'];
+                for (const sep of separators) {
+                    if (cleanLine.includes(sep)) { separator = sep; break; }
+                }
+                
+                if (!separator) return null;
+                
+                const parts = cleanLine.split(separator);
+                const word = parts[0].trim();
+                const translation = parts.slice(1).join(' ').trim();
+                
+                if (!word || !translation) return null;
+                
+                return { word, transcription, translation };
+            }
+            
+            function speak(text, langOverride) {
+                if ('speechSynthesis' in window) {
+                    speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    const lang = langOverride || (getActiveSet() ? getActiveSet().lang : 'en');
+                    utterance.lang = LANGS[lang].code;
+                    utterance.rate = 0.9;
+                    speechSynthesis.speak(utterance);
+                }
+            }
+            
+            function showScreen(id) {
+                ['sets', 'import', 'list', 'train', 'test'].forEach(screen => {
+                    document.getElementById(screen).style.display = 'none';
+                });
+                document.getElementById(id).style.display = 'block';
+                
+                if (id === 'sets') renderSets();
+                if (id === 'import') renderImport();
+                if (id === 'list') renderList();
+                if (id === 'train') startTraining();
+                if (id === 'test') showTestMenu();
+            }
+            
+            showScreen('sets');
+            
+            function getActiveSet() {
+                return sets.find(s => s.id === activeSetId);
+            }
+            
+            function saveSets() {
+                localStorage.setItem('sets', JSON.stringify(sets));
+            }
+            
+            function renderSets() {
+                const container = document.getElementById('setsContent');
+                
+                if (sets.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty">Пока нет сетов. Создай первый!</div>
+                        ${renderCreateSetForm()}
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = `
+                    ${renderCreateSetForm()}
+                    <div class="set-list">
+                        ${sets.map(set => `
+                            <div class="set-item ${set.id === activeSetId ? 'active' : ''}" onclick="selectSet(${set.id})">
+                                <div class="set-info">
+                                    <div class="set-name">${LANGS[set.lang].flag} ${set.name}</div>
+                                    <div class="set-count">${set.words.length} слов · ${LANGS[set.lang].name}</div>
+                                </div>
+                                <div class="set-actions">
+                                    <button class="set-btn" onclick="event.stopPropagation(); toggleSetLang(${set.id})" title="Сменить язык">${LANGS[set.lang].flag}</button>
+                                    <button class="set-btn" onclick="event.stopPropagation(); renameSet(${set.id})">✏️</button>
+                                    <button class="set-btn delete" onclick="event.stopPropagation(); deleteSet(${set.id})">🗑</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            function renderCreateSetForm() {
+                return `
+                    <input type="text" class="set-input" id="newSetName" placeholder="Название нового сета...">
+                    <div style="font-size: 13px; color: #666; margin-bottom: 8px;">Выбери язык:</div>
+                    <div class="lang-selector">
+                        <div class="lang-option ${newSetLang === 'en' ? 'selected' : ''}" onclick="selectNewSetLang('en')">
+                            <span class="flag">🇬🇧</span>Английский
+                        </div>
+                        <div class="lang-option ${newSetLang === 'de' ? 'selected' : ''}" onclick="selectNewSetLang('de')">
+                            <span class="flag">🇩🇪</span>Немецкий
+                        </div>
+                    </div>
+                    <button class="primary" onclick="createSet()" style="margin-bottom: 20px;">➕ Создать сет</button>
+                `;
+            }
+            
+            function selectNewSetLang(lang) { newSetLang = lang; renderSets(); }
+            
+            function createSet() {
+                const input = document.getElementById('newSetName');
+                const name = input.value.trim();
+                if (!name) { alert('Введи название сета'); return; }
+                
+                const newSet = { id: Date.now(), name, lang: newSetLang, words: [] };
+                sets.push(newSet);
+                activeSetId = newSet.id;
+                saveSets();
+                renderSets();
+            }
+            
+            function selectSet(id) { activeSetId = id; saveSets(); renderSets(); }
+            
+            function renameSet(id) {
+                const set = sets.find(s => s.id === id);
+                const newName = prompt('Новое название:', set.name);
+                if (newName && newName.trim()) {
+                    set.name = newName.trim();
+                    saveSets();
+                    renderSets();
+                }
+            }
+            
+            function toggleSetLang(id) {
+                const set = sets.find(s => s.id === id);
+                set.lang = set.lang === 'en' ? 'de' : 'en';
+                saveSets();
+                renderSets();
+            }
+            
+            function deleteSet(id) {
+                if (!confirm('Удалить этот сет? Все слова будут потеряны.')) return;
+                sets = sets.filter(s => s.id !== id);
+                if (activeSetId === id) activeSetId = sets.length > 0 ? sets[0].id : null;
+                saveSets();
+                renderSets();
+            }
+            
+            function renderImport() {
+                const container = document.getElementById('importContent');
+                
+                if (!activeSetId) {
+                    container.innerHTML = '<div class="empty">Сначала создай сет во вкладке "Сеты"</div>';
+                    return;
+                }
+                
+                const activeSet = getActiveSet();
+                container.innerHTML = `
+                    <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name} · ${LANGS[activeSet.lang].name}</div>
+                    
+                    <div class="import-sources">
+                        <div class="source-btn ${importSource === 'text' ? 'active' : ''}" onclick="switchImportSource('text')">
+                            <span class="icon">⌨️</span>Вручную
+                        </div>
+                        <div class="source-btn ${importSource === 'pdf' ? 'active' : ''}" onclick="switchImportSource('pdf')">
+                            <span class="icon">📄</span>Из PDF
+                        </div>
+                    </div>
+                    
+                    <div id="importBody"></div>
+                `;
+                
+                renderImportBody();
+            }
+            
+            function switchImportSource(source) { importSource = source; renderImport(); }
+            
+            function renderImportBody() {
+                const body = document.getElementById('importBody');
+                
+                if (importSource === 'text') {
+                    body.innerHTML = `
+                        <div class="hint">
+                            Поддерживаемые форматы (транскрипция распознаётся автоматически):<br>
+                            • <code>apple [ˈæp.əl] - яблоко</code><br>
+                            • <code>apple /ˈæp.əl/ - яблоко</code><br>
+                            • <code>apple - яблоко</code> (без транскрипции)<br>
+                            • Разделители: <code>- , : =</code> или табуляция
+                        </div>
+                        <textarea id="input" rows="8" placeholder="apple [ˈæp.əl] - яблоко&#10;banana /bəˈnɑːnə/ - банан&#10;orange - апельсин"></textarea>
+                        <button class="primary" onclick="importWords()">Импортировать</button>
+                    `;
+                } else {
+                    body.innerHTML = `
+                        <div class="pdf-drop-zone" onclick="document.getElementById('pdfFile').click()">
+                            <div class="icon">📄</div>
+                            <div class="text">Нажми, чтобы выбрать PDF-файл</div>
+                            <div class="text" style="font-size: 12px; margin-top: 5px;">Текст будет извлечён и показан ниже — ты сможешь его отредактировать</div>
+                            ${extractedPdfText ? '<div class="filename">✅ Файл загружен</div>' : ''}
+                        </div>
+                        <input type="file" id="pdfFile" accept=".pdf" style="display:none" onchange="handlePdfUpload(event)">
+                        <div id="pdfStatus"></div>
+                        ${extractedPdfText ? `
+                            <div class="hint">
+                                ✨ Извлечённый текст. Транскрипция в [...] или /.../ распознаётся автоматически.
+                            </div>
+                            <textarea id="input" rows="10">${extractedPdfText}</textarea>
+                            <button class="primary" onclick="importWords()">Импортировать</button>
+                            <button class="primary" style="background:#888;" onclick="clearPdfText()">🗑 Очистить</button>
+                        ` : ''}
+                    `;
+                }
+            }
+            
+            async function handlePdfUpload(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const status = document.getElementById('pdfStatus');
+                status.innerHTML = '<div class="pdf-loading"><span class="spinner"></span>Извлекаю текст из PDF...</div>';
+                
+                try {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                    
+                    let fullText = '';
+                    
+                    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                        const page = await pdf.getPage(pageNum);
+                        const textContent = await page.getTextContent();
+                        
+                        const lines = {};
+                        textContent.items.forEach(item => {
+                            const y = Math.round(item.transform[5]);
+                            if (!lines[y]) lines[y] = [];
+                            lines[y].push({ x: item.transform[4], str: item.str });
+                        });
+                        
+                        const sortedYs = Object.keys(lines).map(Number).sort((a, b) => b - a);
+                        sortedYs.forEach(y => {
+                            const sortedItems = lines[y].sort((a, b) => a.x - b.x);
+                            const lineText = sortedItems.map(i => i.str).join(' ');
+                            if (lineText.trim()) fullText += lineText.trim() + '\n';
+                        });
+                        
+                        fullText += '\n';
+                    }
+                    
+                    extractedPdfText = fullText.replace(/\n{3,}/g, '\n\n').trim();
+                    status.innerHTML = `<div class="hint" style="background:#d4edda; color:#155724;">✅ Извлечено ${pdf.numPages} страниц.</div>`;
+                    renderImportBody();
+                    
+                } catch (err) {
+                    console.error(err);
+                    status.innerHTML = `<div class="hint" style="background:#f8d7da; color:#721c24;">❌ Ошибка: ${err.message}</div>`;
+                }
+            }
+            
+            function clearPdfText() { extractedPdfText = ''; renderImportBody(); }
+            
+            function importWords() {
+                const activeSet = getActiveSet();
+                if (!activeSet) { alert('Выбери сет'); return; }
+                
+                const input = document.getElementById('input');
+                if (!input) { alert('Сначала загрузи PDF или введи текст'); return; }
+                
+                const text = input.value;
+                const lines = text.split('\n');
+                let added = 0;
+                
+                for (const line of lines) {
+                    const parsed = parseLine(line);
+                    if (parsed) {
+                        activeSet.words.push(parsed);
+                        added++;
+                    }
+                }
+                
+                if (added === 0) {
+                    alert('Не удалось распознать слова. Проверь формат.');
+                    return;
+                }
+                
+                saveSets();
+                extractedPdfText = '';
+                alert(`✅ Импортировано слов: ${added}`);
+                renderImport();
+            }
+            
+            function renderList() {
+                const container = document.getElementById('listContent');
+                const activeSet = getActiveSet();
+                
+                if (!activeSet) {
+                    container.innerHTML = '<div class="empty">Сначала создай сет</div>';
+                    return;
+                }
+                
+                if (activeSet.words.length === 0) {
+                    container.innerHTML = `
+                        <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div>
+                        <div class="empty">В этом сете пока нет слов.</div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = `
+                    <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name} · ${activeSet.words.length} слов · ${LANGS[activeSet.lang].name}</div>
+                    <div class="word-list">
+                        ${activeSet.words.map((w, i) => `
+                            <div class="word-item" id="word-${i}">
+                                <div class="word-main">
+                                    <span class="word">${w.word}</span>
+                                    ${w.transcription ? `<span class="transcription">[${w.transcription}]</span>` : ''}
+                                    <span class="translation">— ${w.translation}</span>
+                                </div>
+                                <div class="actions">
+                                    <button class="action-btn speak" onclick="speak('${w.word.replace(/'/g, "\\'")}')">🔊</button>
+                                    <button class="action-btn" onclick="editWord(${i})">✏️</button>
+                                    <button class="action-btn delete" onclick="deleteWord(${i})">✕</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            function editWord(index) {
+                const activeSet = getActiveSet();
+                const word = activeSet.words[index];
+                const item = document.getElementById(`word-${index}`);
+                
+                item.innerHTML = `
+                    <input type="text" class="edit-input" id="edit-word-${index}" value="${word.word}" placeholder="Слово" style="flex:2">
+                    <input type="text" class="edit-input" id="edit-transcription-${index}" value="${word.transcription || ''}" placeholder="Транскрипция (необязательно)" style="flex:2">
+                    <input type="text" class="edit-input" id="edit-translation-${index}" value="${word.translation}" placeholder="Перевод" style="flex:2">
+                    <button class="action-btn" onclick="saveEdit(${index})">💾</button>
+                    <button class="action-btn delete" onclick="renderList()">✕</button>
+                `;
+                
+                document.getElementById(`edit-word-${index}`).focus();
+            }
+            
+            function saveEdit(index) {
+                const activeSet = getActiveSet();
+                const newWord = document.getElementById(`edit-word-${index}`).value.trim();
+                const newTranscription = document.getElementById(`edit-transcription-${index}`).value.trim();
+                const newTranslation = document.getElementById(`edit-translation-${index}`).value.trim();
+                
+                if (!newWord || !newTranslation) {
+                    alert('Заполни поля "Слово" и "Перевод"');
+                    return;
+                }
+                
+                activeSet.words[index] = { 
+                    word: newWord, 
+                    transcription: newTranscription,
+                    translation: newTranslation 
+                };
+                saveSets();
+                renderList();
+            }
+            
+            function deleteWord(index) {
+                const activeSet = getActiveSet();
+                activeSet.words.splice(index, 1);
+                saveSets();
+                renderList();
+            }
+            
+            function startTraining() {
+                const container = document.getElementById('trainContent');
+                const activeSet = getActiveSet();
+                
+                if (!activeSet || activeSet.words.length === 0) {
+                    container.innerHTML = '<div class="empty">Сначала добавь слова в сет</div>';
+                    return;
+                }
+                
+                trainQueue = [...activeSet.words];
+                for (let i = trainQueue.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [trainQueue[i], trainQueue[j]] = [trainQueue[j], trainQueue[i]];
+                }
+                trainIndex = 0;
+                renderTrainCard();
+            }
+            
+            function renderTrainCard() {
+                const container = document.getElementById('trainContent');
+                const activeSet = getActiveSet();
+                
+                if (trainIndex >= trainQueue.length) {
+                    container.innerHTML = `
+                        <div class="results">
+                            <h2>🎉 Тренировка завершена!</h2>
+                            <div class="label">Ты прошёл все ${trainQueue.length} карточек</div>
+                            <button class="primary" onclick="startTraining()">🔄 Начать заново</button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                const currentCard = trainQueue[trainIndex];
+                
+                container.innerHTML = `
+                    <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div>
+                    <div class="progress">Карточка ${trainIndex + 1} из ${trainQueue.length}</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width: ${(trainIndex / trainQueue.length) * 100}%"></div></div>
+                    <div class="card" onclick="flipCard()">
+                        <button class="speak-btn" onclick="event.stopPropagation(); speak('${currentCard.word.replace(/'/g, "\\'")}')">🔊</button>
+                        <div class="front">${currentCard.word}</div>
+                        <div class="back" style="opacity:0.6">👆 Нажми, чтобы увидеть перевод</div>
+                    </div>
+                `;
+            }
+            
+            function flipCard() {
+                const container = document.getElementById('trainContent');
+                const currentCard = trainQueue[trainIndex];
+                const activeSet = getActiveSet();
+                
+                container.innerHTML = `
+                    <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div>
+                    <div class="progress">Карточка ${trainIndex + 1} из ${trainQueue.length}</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width: ${(trainIndex / trainQueue.length) * 100}%"></div></div>
+                    <div class="card">
+                        <button class="speak-btn" onclick="speak('${currentCard.word.replace(/'/g, "\\'")}')">🔊</button>
+                        <div class="front">${currentCard.word}</div>
+                        <div class="back">${currentCard.translation}</div>
+                    </div>
+                    <div class="actions">
+                        <button class="btn-fail" onclick="nextTrainCard()">❌ Не знал</button>
+                        <button class="btn-success" onclick="nextTrainCard()">✅ Знал</button>
+                    </div>
+                `;
+            }
+            
+            function nextTrainCard() { trainIndex++; renderTrainCard(); }
+            
+            function showTestMenu() {
+                const container = document.getElementById('testContent');
+                const activeSet = getActiveSet();
+                
+                if (!activeSet || activeSet.words.length < 4) {
+                    container.innerHTML = '<div class="empty">Нужно минимум 4 слова в активном сете</div>';
+                    return;
+                }
+                
+                container.innerHTML = `
+                    <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div>
+                    <div class="hint">Выбери тип задания. Тест будет из 10 вопросов.</div>
+                    <div class="test-menu">
+                        <button class="test-option" onclick="startTest(1)">
+                            <div class="title">1️⃣ Выбрать перевод</div>
+                            <div class="desc">Показываем слово — выбери правильный перевод из 4 вариантов</div>
+                        </button>
+                        <button class="test-option" onclick="startTest(2)">
+                            <div class="title">2️⃣ Верный / Неверный</div>
+                            <div class="desc">Показываем слово и перевод — угадай, правильно ли</div>
+                        </button>
+                        <button class="test-option" onclick="startTest(3)">
+                            <div class="title">3️⃣ Вписать слово</div>
+                            <div class="desc">Показываем перевод — впиши слово на иностранном языке</div>
+                        </button>
+                    </div>
+                `;
+            }
+            
+            function startTest(type) {
+                const activeSet = getActiveSet();
+                currentTestType = type;
+                testPassed = 0;
+                testTotal = Math.min(10, activeSet.words.length);
+                testCorrect = 0;
+                answered = false;
+                nextQuestion();
+            }
+            
+            function nextQuestion() {
+                const activeSet = getActiveSet();
+                if (testPassed >= testTotal) { showResults(); return; }
+                
+                answered = false;
+                const correctWord = activeSet.words[Math.floor(Math.random() * activeSet.words.length)];
+                
+                if (currentTestType === 1) renderTest1(correctWord);
+                else if (currentTestType === 2) renderTest2(correctWord);
+                else if (currentTestType === 3) renderTest3(correctWord);
+            }
+            
+            function renderTest1(correctWord) {
+                const container = document.getElementById('testContent');
+                const activeSet = getActiveSet();
+                
+                const wrongOptions = [];
+                const pool = activeSet.words.filter(w => w.translation !== correctWord.translation);
+                while (wrongOptions.length < 3 && pool.length > 0) {
+                    const idx = Math.floor(Math.random() * pool.length);
+                    wrongOptions.push(pool.splice(idx, 1)[0]);
+                }
+                
+                const allOptions = [correctWord, ...wrongOptions];
+                for (let i = allOptions.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [allOptions[i], allOptions[j]] = [allOptions[j], allOptions[i]];
+                }
+                
+                currentQuestion = { correct: correctWord, options: allOptions };
+                
+                container.innerHTML = `
+                    <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div>
+                    <div class="progress">Вопрос ${testPassed + 1} из ${testTotal} · Правильных: ${testCorrect}</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width: ${(testPassed / testTotal) * 100}%"></div></div>
+                    <div class="card" style="cursor: default; min-height: 120px;">
+                        <button class="speak-btn" onclick="speak('${correctWord.word.replace(/'/g, "\\'")}')">🔊</button>
+                        <div class="front">${correctWord.word}</div>
+                    </div>
+                    <div class="options">
+                        ${allOptions.map((opt, i) => `
+                            <button class="option-btn" onclick="checkTest1(${i})">
+                                ${opt.translation}
+                                <button class="speak-btn" onclick="event.stopPropagation(); speak('${opt.word.replace(/'/g, "\\'")}')">🔊</button>
+                            </button>
+                        `).join('')}
+                    </div>
+                    <button class="primary" style="background:#888; margin-top: 20px;" onclick="showTestMenu()">← Выйти в меню</button>
+                `;
+            }
+            
+            function checkTest1(index) {
+                if (answered) return;
+                answered = true;
+                
+                const selected = currentQuestion.options[index];
+                const isCorrect = selected.translation === currentQuestion.correct.translation;
+                
+                const buttons = document.querySelectorAll('.option-btn');
+                buttons.forEach((btn, i) => {
+                    if (currentQuestion.options[i].translation === currentQuestion.correct.translation) {
+                        btn.classList.add('correct');
+                    } else if (i === index && !isCorrect) {
+                        btn.classList.add('wrong');
+                    }
+                    btn.onclick = null;
+                });
+                
+                if (isCorrect) testCorrect++;
+                testPassed++;
+                setTimeout(nextQuestion, 1200);
+            }
+            
+            function renderTest2(correctWord) {
+                const container = document.getElementById('testContent');
+                const activeSet = getActiveSet();
+                
+                const isTruePair = Math.random() < 0.5;
+                let shownTranslation;
+                
+                if (isTruePair) {
+                    shownTranslation = correctWord.translation;
+                } else {
+                    const pool = activeSet.words.filter(w => w.translation !== correctWord.translation);
+                    const wrong = pool[Math.floor(Math.random() * pool.length)];
+                    shownTranslation = wrong.translation;
+                }
+                
+                currentQuestion = { correct: correctWord, isTruePair, shownTranslation };
+                
+                container.innerHTML = `
+                    <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div>
+                    <div class="progress">Вопрос ${testPassed + 1} из ${testTotal} · Правильных: ${testCorrect}</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width: ${(testPassed / testTotal) * 100}%"></div></div>
+                    <div class="card" style="cursor: default; min-height: 150px;">
+                        <button class="speak-btn" onclick="speak('${correctWord.word.replace(/'/g, "\\'")}')">🔊</button>
+                        <div class="front">${correctWord.word}</div>
+                        <div class="back">${shownTranslation}</div>
+                    </div>
+                    <div class="actions">
+                        <button class="btn-fail" onclick="checkTest2(false)">❌ Неверно</button>
+                        <button class="btn-success" onclick="checkTest2(true)">✅ Верно</button>
+                    </div>
+                    <button class="primary" style="background:#888; margin-top: 20px;" onclick="showTestMenu()">← Выйти в меню</button>
+                `;
+            }
+            
+            function checkTest2(userSaysTrue) {
+                if (answered) return;
+                answered = true;
+                
+                const isCorrect = userSaysTrue === currentQuestion.isTruePair;
+                if (isCorrect) testCorrect++;
+                testPassed++;
+                
+                const buttons = document.querySelectorAll('.actions button');
+                buttons.forEach(b => b.disabled = true);
+                
+                const feedback = document.createElement('div');
+                feedback.className = 'feedback ' + (isCorrect ? 'correct' : 'wrong');
+                feedback.textContent = isCorrect ? '✅ Правильно!' : `❌ Ошибка.`;
+                document.querySelector('#testContent .actions').after(feedback);
+                
+                setTimeout(nextQuestion, 1200);
+            }
+            
+            function renderTest3(correctWord) {
+                const container = document.getElementById('testContent');
+                const activeSet = getActiveSet();
+                currentQuestion = { correct: correctWord };
+                
+                container.innerHTML = `
+                    <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div>
+                    <div class="progress">Вопрос ${testPassed + 1} из ${testTotal} · Правильных: ${testCorrect}</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width: ${(testPassed / testTotal) * 100}%"></div></div>
+                    <div class="card" style="cursor: default; min-height: 120px;">
+                        <div class="front">${correctWord.translation}</div>
+                        <div class="back" style="opacity:0.7; font-size: 16px;">Впиши слово на иностранном языке</div>
+                    </div>
+                    <input type="text" class="answer-input" id="answerInput" placeholder="Твой ответ..." autocomplete="off">
+                    <button class="primary" onclick="checkTest3()">Проверить</button>
+                    <button class="primary" style="background:#888;" onclick="showTestMenu()">← Выйти в меню</button>
+                `;
+                
+                const input = document.getElementById('answerInput');
+                input.focus();
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') checkTest3();
+                });
+            }
+            
+            function checkTest3() {
+                if (answered) return;
+                
+                const input = document.getElementById('answerInput');
+                const userAnswer = input.value.trim().toLowerCase();
+                const correctAnswer = currentQuestion.correct.word.toLowerCase();
+                
+                if (userAnswer === '') return;
+                
+                answered = true;
+                const isCorrect = userAnswer === correctAnswer;
+                
+                input.classList.add(isCorrect ? 'correct' : 'wrong');
+                input.disabled = true;
+                
+                if (isCorrect) testCorrect++;
+                testPassed++;
+                
+                const feedback = document.createElement('div');
+                feedback.className = 'feedback ' + (isCorrect ? 'correct' : 'wrong');
+                feedback.textContent = isCorrect ? '✅ Правильно!' : `❌ Правильный ответ: ${currentQuestion.correct.word}`;
+                input.after(feedback);
+                
+                setTimeout(nextQuestion, 1500);
+            }
+            
+            function showResults() {
+                const container = document.getElementById('testContent');
+                const activeSet = getActiveSet();
+                const percent = Math.round((testCorrect / testTotal) * 100);
+                
+                let emoji = '🎉';
+                let message = 'Отличный результат!';
+                if (percent < 50) { emoji = '💪'; message = 'Нужно ещё попрактиковаться!'; }
+                else if (percent < 80) { emoji = '👍'; message = 'Хороший результат!'; }
+                
+                container.innerHTML = `
+                    <div class="results">
+                        <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div>
+                        <div style="font-size: 64px;">${emoji}</div>
+                        <div class="score">${testCorrect} / ${testTotal}</div>
+                        <div class="label">${percent}% правильных ответов</div>
+                        <div class="label" style="margin-top: 10px;">${message}</div>
+                        <button class="primary" onclick="startTest(${currentTestType})">🔄 Пройти ещё раз</button>
+                        <button class="primary" style="background:#888;" onclick="showTestMenu()">← В меню тестов</button>
+                    </div>
+                `;
+            }
+        </script>
+    </body>
+</html>
