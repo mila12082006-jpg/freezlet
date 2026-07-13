@@ -2,8 +2,8 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>freezlet</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <title>Мозгосайт</title>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
         <style>
             /* Базовые стили */
@@ -19,13 +19,19 @@
             .word-item .action-btn.speak { background: #51cf66; }
             .empty { text-align: center; padding: 40px; color: #999; }
             
-            body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-family: 'Arial', sans-serif; margin: 0; padding: 20px; }
+            body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-family: 'Arial', sans-serif; margin: 0; padding: 20px; padding-bottom: 80px; /* Отступ для нижней панели на мобильных */ }
             .container { max-width: 700px; margin: 0 auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+            
+            /* Верхние вкладки (для десктопа) */
             .tabs { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 10px; flex-wrap: wrap; }
+            .nav-btn { background: none; border: none; padding: 12px 20px; cursor: pointer; font-size: 16px; color: #888; border-bottom: 3px solid transparent; transition: all 0.3s; }
+            .nav-btn:hover { color: #667eea; }
+            .nav-btn.active { color: #667eea; border-bottom-color: #667eea; font-weight: 600; }
+            
             h1 { text-align: center; color: #667eea; margin-bottom: 25px; font-family: 'Verdana', sans-serif; }
             
-            button { background: none; border: none; padding: 12px 20px; cursor: pointer; font-size: 16px; color: #888; border-bottom: 3px solid transparent; transition: all 0.3s; }
             button.primary { background: #667eea; color: white; border: none; padding: 12px 24px; border-radius: 10px; font-size: 15px; cursor: pointer; width: 100%; margin-top: 15px; }
+            button.primary:hover { background: #5568d3; }
             
             .card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 50px 30px; border-radius: 15px; text-align: center; min-height: 200px; display: flex; flex-direction: column; justify-content: center; cursor: pointer; margin-bottom: 20px; transition: transform 0.3s; position: relative; }
             .card:hover { transform: scale(1.02); }
@@ -34,13 +40,10 @@
             .card .speak-btn { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 18px; }
             .card .speak-btn:hover { background: rgba(255,255,255,0.3); }
             
-            .actions { display: flex; gap: 10px; }
-            .actions button { flex: 1; padding: 15px; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; font-weight: 600; }
+            .actions-row { display: flex; gap: 10px; }
+            .actions-row button { flex: 1; padding: 15px; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; font-weight: 600; }
             .btn-fail { background: #ff6b6b; color: white; }
             .btn-success { background: #51cf66; color: white; }
-            
-            button.primary:hover { background: #5568d3; }
-            button:hover { color: #667eea; }
             
             .hint { background: #f5f5ff; padding: 12px; border-radius: 8px; font-size: 13px; color: #666; margin: 10px 0; }
             
@@ -95,7 +98,7 @@
             
             .active-set-badge { background: #667eea; color: white; padding: 6px 12px; border-radius: 20px; font-size: 13px; display: inline-block; margin-bottom: 15px; }
             
-            .edit-input { padding: 8px; border: 2px solid #667eea; border-radius: 5px; font-size: 14px; margin-right: 5px; }
+            .edit-input { padding: 8px; border: 2px solid #667eea; border-radius: 5px; font-size: 14px; margin-right: 5px; margin-bottom: 5px; }
             
             .lang-selector { display: flex; gap: 10px; margin-bottom: 15px; }
             .lang-option { flex: 1; padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; text-align: center; transition: all 0.2s; background: white; font-size: 15px; }
@@ -118,68 +121,95 @@
             .pdf-loading { text-align: center; padding: 20px; color: #667eea; }
             .pdf-loading .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #eee; border-top-color: #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 10px; vertical-align: middle; }
             @keyframes spin { to { transform: rotate(360deg); } }
-            
-            /* ========== АДАПТИВНОСТЬ ========== */
-            
-            /* Планшеты и большие телефоны (до 768px) */
+
+            /* ========================================= */
+            /* НИЖНЯЯ ПАНЕЛЬ НАВИГАЦИИ (ДЛЯ МОБИЛЬНЫХ)   */
+            /* ========================================= */
+            .bottom-nav {
+                display: none; /* Скрыта на десктопе */
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: white;
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+                z-index: 1000;
+                padding-bottom: env(safe-area-inset-bottom); /* Для iPhone с челкой */
+            }
+            .bottom-nav-items {
+                display: flex;
+                justify-content: space-around;
+                padding: 8px 0;
+            }
+            .bottom-nav-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                background: none;
+                border: none;
+                color: #888;
+                font-size: 10px;
+                cursor: pointer;
+                padding: 5px;
+                flex: 1;
+                transition: color 0.2s;
+            }
+            .bottom-nav-item .icon {
+                font-size: 22px;
+                margin-bottom: 3px;
+            }
+            .bottom-nav-item.active {
+                color: #667eea;
+            }
+
+            /* ========================================= */
+            /* АДАПТИВНОСТЬ                              */
+            /* ========================================= */
             @media (max-width: 768px) {
-                body { padding: 10px; }
+                body { padding: 10px; padding-bottom: 80px; }
                 .container { padding: 20px; border-radius: 15px; }
-                h1 { font-size: 24px; margin-bottom: 20px; }
+                h1 { font-size: 22px; margin-bottom: 15px; }
                 h2 { font-size: 18px; }
                 
-                /* Вкладки в два ряда на планшетах */
-                .tabs { gap: 5px; }
-                .tabs button { padding: 10px 15px; font-size: 14px; }
+                /* Скрываем верхние вкладки, показываем нижние */
+                .tabs { display: none; }
+                .bottom-nav { display: block; }
                 
-                /* Карточки меньше */
                 .card { padding: 30px 20px; min-height: 150px; }
                 .card .front { font-size: 24px; }
                 .card .back { font-size: 18px; }
                 
-                /* Кнопки действий больше для пальцев */
-                .actions button { padding: 12px; font-size: 15px; }
+                .actions-row button { padding: 12px; font-size: 15px; }
                 
-                /* Список слов */
                 .word-item { padding: 10px; }
                 .word-item .word { font-size: 14px; }
                 .word-item .translation { font-size: 13px; display: block; margin-left: 0; margin-top: 3px; }
                 .word-item .actions { flex-direction: column; gap: 3px; }
                 .word-item .action-btn { padding: 6px 8px; font-size: 11px; }
                 
-                /* Сеты */
                 .set-item { padding: 12px; }
                 .set-item .set-name { font-size: 15px; }
                 .set-item .set-actions { flex-direction: column; gap: 5px; }
                 
-                /* Тесты */
                 .test-option { padding: 15px; }
                 .option-btn { padding: 12px; font-size: 15px; }
                 
-                /* Результаты */
                 .results .score { font-size: 36px; }
             }
             
-            /* Телефоны (до 480px) */
             @media (max-width: 480px) {
-                body { padding: 5px; }
+                body { padding: 5px; padding-bottom: 75px; }
                 .container { padding: 15px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-                h1 { font-size: 20px; margin-bottom: 15px; }
+                h1 { font-size: 20px; }
                 h2 { font-size: 16px; margin-bottom: 10px; }
                 
-                /* Вкладки компактные */
-                .tabs { gap: 3px; margin-bottom: 15px; padding-bottom: 8px; }
-                .tabs button { padding: 8px 10px; font-size: 12px; flex: 1; min-width: 0; white-space: nowrap; }
-                
-                /* Карточки */
                 .card { padding: 25px 15px; min-height: 120px; margin-bottom: 15px; }
                 .card .front { font-size: 20px; }
                 .card .back { font-size: 16px; margin-top: 10px; }
                 .card .speak-btn { top: 10px; right: 10px; padding: 6px 10px; font-size: 16px; }
                 
-                /* Кнопки действий */
-                .actions { gap: 8px; }
-                .actions button { padding: 10px; font-size: 14px; }
+                .actions-row { gap: 8px; }
+                .actions-row button { padding: 10px; font-size: 14px; }
                 
                 /* Список слов - вертикальная компоновка */
                 .word-item { flex-direction: column; align-items: flex-start; gap: 8px; }
@@ -190,83 +220,53 @@
                 .word-item .actions { width: 100%; justify-content: flex-end; flex-direction: row; }
                 .word-item .action-btn { padding: 8px 12px; font-size: 12px; }
                 
-                /* Редактирование слов */
-                .edit-input { width: 100%; margin-right: 0; margin-bottom: 5px; font-size: 13px; }
+                .edit-input { width: 100%; margin-right: 0; font-size: 13px; }
                 
-                /* Сеты */
                 .set-item { flex-direction: column; align-items: flex-start; gap: 10px; }
                 .set-item .set-info { width: 100%; }
-                .set-item .set-name { font-size: 14px; }
-                .set-item .set-count { font-size: 12px; }
                 .set-item .set-actions { width: 100%; justify-content: flex-end; flex-direction: row; }
-                .set-item .set-btn { padding: 8px 12px; font-size: 11px; }
                 
-                /* Поля ввода */
                 textarea { font-size: 13px; padding: 12px; }
                 .set-input { font-size: 14px; padding: 10px; }
                 
-                /* Языки */
                 .lang-selector { gap: 8px; }
                 .lang-option { padding: 12px; font-size: 13px; }
                 .lang-option .flag { font-size: 20px; }
                 
-                /* Импорт */
                 .import-sources { gap: 8px; }
                 .source-btn { padding: 12px; font-size: 13px; }
                 .source-btn .icon { font-size: 20px; }
                 
-                /* PDF */
                 .pdf-drop-zone { padding: 20px; }
                 .pdf-drop-zone .icon { font-size: 30px; }
-                .pdf-drop-zone .text { font-size: 13px; }
                 
-                /* Тесты */
                 .test-option { padding: 12px; font-size: 14px; }
-                .test-option .title { font-size: 14px; }
-                .test-option .desc { font-size: 12px; }
                 .option-btn { padding: 10px; font-size: 14px; padding-right: 45px; }
                 .option-btn .speak-btn { padding: 4px 8px; font-size: 12px; }
                 
                 .answer-input { font-size: 16px; padding: 12px; }
                 
-                /* Результаты */
                 .results { padding: 20px; }
                 .results .score { font-size: 32px; margin: 15px 0; }
-                .results .label { font-size: 14px; }
                 
-                /* Прогресс */
                 .progress { font-size: 13px; margin-bottom: 10px; }
-                .progress-bar { height: 5px; }
-                
-                /* Подсказки */
                 .hint { padding: 10px; font-size: 12px; }
-                
-                /* Бейдж */
                 .active-set-badge { font-size: 12px; padding: 5px 10px; }
-            }
-            
-            /* Очень маленькие экраны (до 360px) */
-            @media (max-width: 360px) {
-                .container { padding: 10px; }
-                h1 { font-size: 18px; }
-                .tabs button { font-size: 11px; padding: 6px 8px; }
-                .card .front { font-size: 18px; }
-                .card .back { font-size: 14px; }
-                .actions button { font-size: 13px; padding: 8px; }
             }
         </style>
     </head>
     
     <body>
         <div class="container">
-            <h1>Freezlet</h1>
+            <h1>Мозгосайт</h1>
             
+            <!-- Верхняя навигация (только для десктопа) -->
             <div class="tabs">
-                <button onclick="showScreen('sets')">📚 Сеты</button>
-                <button onclick="showScreen('import')">📥 Импорт</button>
-                <button onclick="showScreen('list')">📋 Список</button>
-                <button onclick="showScreen('train')">🎴 Тренировка</button>
-                <button onclick="showScreen('test')">📝 Тест</button>
+                <button class="nav-btn" data-screen="sets" onclick="showScreen('sets')">📚 Сеты</button>
+                <button class="nav-btn" data-screen="import" onclick="showScreen('import')">📥 Импорт</button>
+                <button class="nav-btn" data-screen="list" onclick="showScreen('list')">📋 Список</button>
+                <button class="nav-btn" data-screen="train" onclick="showScreen('train')">🎴 Тренировка</button>
+                <button class="nav-btn" data-screen="test" onclick="showScreen('test')">📝 Тест</button>
             </div>
             
             <div id="sets"><h2>Твои сеты</h2><div id="setsContent"></div></div>
@@ -275,6 +275,32 @@
             <div id="train"><h2>Тренировка</h2><div id="trainContent"></div></div>
             <div id="test"><h2>Тест</h2><div id="testContent"></div></div>
         </div>
+
+        <!-- Нижняя навигация (только для мобильных) -->
+        <nav class="bottom-nav">
+            <div class="bottom-nav-items">
+                <button class="bottom-nav-item" data-screen="sets" onclick="showScreen('sets')">
+                    <span class="icon">📚</span>
+                    <span>Сеты</span>
+                </button>
+                <button class="bottom-nav-item" data-screen="import" onclick="showScreen('import')">
+                    <span class="icon">📥</span>
+                    <span>Импорт</span>
+                </button>
+                <button class="bottom-nav-item" data-screen="list" onclick="showScreen('list')">
+                    <span class="icon">📋</span>
+                    <span>Список</span>
+                </button>
+                <button class="bottom-nav-item" data-screen="train" onclick="showScreen('train')">
+                    <span class="icon">🎴</span>
+                    <span>Тренир.</span>
+                </button>
+                <button class="bottom-nav-item" data-screen="test" onclick="showScreen('test')">
+                    <span class="icon">📝</span>
+                    <span>Тест</span>
+                </button>
+            </div>
+        </nav>
         
         <script>
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -358,10 +384,20 @@
             }
             
             function showScreen(id) {
+                // Скрываем все экраны
                 ['sets', 'import', 'list', 'train', 'test'].forEach(screen => {
                     document.getElementById(screen).style.display = 'none';
                 });
+                // Показываем нужный
                 document.getElementById(id).style.display = 'block';
+                
+                // Обновляем активный класс у кнопок (и верхних, и нижних)
+                document.querySelectorAll('.nav-btn, .bottom-nav-item').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.getAttribute('data-screen') === id) {
+                        btn.classList.add('active');
+                    }
+                });
                 
                 if (id === 'sets') renderSets();
                 if (id === 'import') renderImport();
@@ -382,15 +418,10 @@
             
             function renderSets() {
                 const container = document.getElementById('setsContent');
-                
                 if (sets.length === 0) {
-                    container.innerHTML = `
-                        <div class="empty">Пока нет сетов. Создай первый!</div>
-                        ${renderCreateSetForm()}
-                    `;
+                    container.innerHTML = `<div class="empty">Пока нет сетов. Создай первый!</div>${renderCreateSetForm()}`;
                     return;
                 }
-                
                 container.innerHTML = `
                     ${renderCreateSetForm()}
                     <div class="set-list">
@@ -433,7 +464,6 @@
                 const input = document.getElementById('newSetName');
                 const name = input.value.trim();
                 if (!name) { alert('Введи название сета'); return; }
-                
                 const newSet = { id: Date.now(), name, lang: newSetLang, words: [] };
                 sets.push(newSet);
                 activeSetId = newSet.id;
@@ -446,11 +476,7 @@
             function renameSet(id) {
                 const set = sets.find(s => s.id === id);
                 const newName = prompt('Новое название:', set.name);
-                if (newName && newName.trim()) {
-                    set.name = newName.trim();
-                    saveSets();
-                    renderSets();
-                }
+                if (newName && newName.trim()) { set.name = newName.trim(); saveSets(); renderSets(); }
             }
             
             function toggleSetLang(id) {
@@ -470,16 +496,10 @@
             
             function renderImport() {
                 const container = document.getElementById('importContent');
-                
-                if (!activeSetId) {
-                    container.innerHTML = '<div class="empty">Сначала создай сет во вкладке "Сеты"</div>';
-                    return;
-                }
-                
+                if (!activeSetId) { container.innerHTML = '<div class="empty">Сначала создай сет во вкладке "Сеты"</div>'; return; }
                 const activeSet = getActiveSet();
                 container.innerHTML = `
                     <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name} · ${LANGS[activeSet.lang].name}</div>
-                    
                     <div class="import-sources">
                         <div class="source-btn ${importSource === 'text' ? 'active' : ''}" onclick="switchImportSource('text')">
                             <span class="icon">⌨️</span>Вручную
@@ -488,10 +508,8 @@
                             <span class="icon">📄</span>Из PDF
                         </div>
                     </div>
-                    
                     <div id="importBody"></div>
                 `;
-                
                 renderImportBody();
             }
             
@@ -499,17 +517,10 @@
             
             function renderImportBody() {
                 const body = document.getElementById('importBody');
-                
                 if (importSource === 'text') {
                     body.innerHTML = `
-                        <div class="hint">
-                            Поддерживаемые форматы (транскрипция распознаётся автоматически):<br>
-                            • <code>apple [ˈæp.əl] - яблоко</code><br>
-                            • <code>apple /ˈæp.əl/ - яблоко</code><br>
-                            • <code>apple - яблоко</code> (без транскрипции)<br>
-                            • Разделители: <code>- , : =</code> или табуляция
-                        </div>
-                        <textarea id="input" rows="8" placeholder="apple [ˈæp.əl] - яблоко&#10;banana /bəˈnɑːnə/ - банан&#10;orange - апельсин"></textarea>
+                        <div class="hint">Поддерживаемые форматы:<br>• <code>apple [ˈæp.əl] - яблоко</code><br>• <code>apple /ˈæp.əl/ - яблоко</code><br>• <code>apple - яблоко</code></div>
+                        <textarea id="input" rows="8" placeholder="apple [ˈæp.əl] - яблоко&#10;banana /bəˈnɑːnə/ - банан"></textarea>
                         <button class="primary" onclick="importWords()">Импортировать</button>
                     `;
                 } else {
@@ -517,15 +528,12 @@
                         <div class="pdf-drop-zone" onclick="document.getElementById('pdfFile').click()">
                             <div class="icon">📄</div>
                             <div class="text">Нажми, чтобы выбрать PDF-файл</div>
-                            <div class="text" style="font-size: 12px; margin-top: 5px;">Текст будет извлечён и показан ниже — ты сможешь его отредактировать</div>
                             ${extractedPdfText ? '<div class="filename">✅ Файл загружен</div>' : ''}
                         </div>
                         <input type="file" id="pdfFile" accept=".pdf" style="display:none" onchange="handlePdfUpload(event)">
                         <div id="pdfStatus"></div>
                         ${extractedPdfText ? `
-                            <div class="hint">
-                                ✨ Извлечённый текст. Транскрипция в [...] или /.../ распознаётся автоматически.
-                            </div>
+                            <div class="hint">✨ Извлечённый текст. Отредактируй при необходимости.</div>
                             <textarea id="input" rows="10">${extractedPdfText}</textarea>
                             <button class="primary" onclick="importWords()">Импортировать</button>
                             <button class="primary" style="background:#888;" onclick="clearPdfText()">🗑 Очистить</button>
@@ -537,43 +545,33 @@
             async function handlePdfUpload(event) {
                 const file = event.target.files[0];
                 if (!file) return;
-                
                 const status = document.getElementById('pdfStatus');
-                status.innerHTML = '<div class="pdf-loading"><span class="spinner"></span>Извлекаю текст из PDF...</div>';
-                
+                status.innerHTML = '<div class="pdf-loading"><span class="spinner"></span>Извлекаю текст...</div>';
                 try {
                     const arrayBuffer = await file.arrayBuffer();
                     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                    
                     let fullText = '';
-                    
                     for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
                         const page = await pdf.getPage(pageNum);
                         const textContent = await page.getTextContent();
-                        
                         const lines = {};
                         textContent.items.forEach(item => {
                             const y = Math.round(item.transform[5]);
                             if (!lines[y]) lines[y] = [];
                             lines[y].push({ x: item.transform[4], str: item.str });
                         });
-                        
                         const sortedYs = Object.keys(lines).map(Number).sort((a, b) => b - a);
                         sortedYs.forEach(y => {
                             const sortedItems = lines[y].sort((a, b) => a.x - b.x);
                             const lineText = sortedItems.map(i => i.str).join(' ');
                             if (lineText.trim()) fullText += lineText.trim() + '\n';
                         });
-                        
                         fullText += '\n';
                     }
-                    
                     extractedPdfText = fullText.replace(/\n{3,}/g, '\n\n').trim();
-                    status.innerHTML = `<div class="hint" style="background:#d4edda; color:#155724;">✅ Извлечено ${pdf.numPages} страниц.</div>`;
+                    status.innerHTML = `<div class="hint" style="background:#d4edda; color:#155724;">✅ Извлечено ${pdf.numPages} стр.</div>`;
                     renderImportBody();
-                    
                 } catch (err) {
-                    console.error(err);
                     status.innerHTML = `<div class="hint" style="background:#f8d7da; color:#721c24;">❌ Ошибка: ${err.message}</div>`;
                 }
             }
@@ -583,27 +581,17 @@
             function importWords() {
                 const activeSet = getActiveSet();
                 if (!activeSet) { alert('Выбери сет'); return; }
-                
                 const input = document.getElementById('input');
                 if (!input) { alert('Сначала загрузи PDF или введи текст'); return; }
                 
-                const text = input.value;
-                const lines = text.split('\n');
+                const lines = input.value.split('\n');
                 let added = 0;
-                
                 for (const line of lines) {
                     const parsed = parseLine(line);
-                    if (parsed) {
-                        activeSet.words.push(parsed);
-                        added++;
-                    }
+                    if (parsed) { activeSet.words.push(parsed); added++; }
                 }
                 
-                if (added === 0) {
-                    alert('Не удалось распознать слова. Проверь формат.');
-                    return;
-                }
-                
+                if (added === 0) { alert('Не удалось распознать слова. Проверь формат.'); return; }
                 saveSets();
                 extractedPdfText = '';
                 alert(`✅ Импортировано слов: ${added}`);
@@ -613,22 +601,13 @@
             function renderList() {
                 const container = document.getElementById('listContent');
                 const activeSet = getActiveSet();
-                
-                if (!activeSet) {
-                    container.innerHTML = '<div class="empty">Сначала создай сет</div>';
-                    return;
-                }
-                
+                if (!activeSet) { container.innerHTML = '<div class="empty">Сначала создай сет</div>'; return; }
                 if (activeSet.words.length === 0) {
-                    container.innerHTML = `
-                        <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div>
-                        <div class="empty">В этом сете пока нет слов.</div>
-                    `;
+                    container.innerHTML = `<div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div><div class="empty">В этом сете пока нет слов.</div>`;
                     return;
                 }
-                
                 container.innerHTML = `
-                    <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name} · ${activeSet.words.length} слов · ${LANGS[activeSet.lang].name}</div>
+                    <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name} · ${activeSet.words.length} слов</div>
                     <div class="word-list">
                         ${activeSet.words.map((w, i) => `
                             <div class="word-item" id="word-${i}">
@@ -652,15 +631,13 @@
                 const activeSet = getActiveSet();
                 const word = activeSet.words[index];
                 const item = document.getElementById(`word-${index}`);
-                
                 item.innerHTML = `
                     <input type="text" class="edit-input" id="edit-word-${index}" value="${word.word}" placeholder="Слово" style="flex:2">
-                    <input type="text" class="edit-input" id="edit-transcription-${index}" value="${word.transcription || ''}" placeholder="Транскрипция (необязательно)" style="flex:2">
+                    <input type="text" class="edit-input" id="edit-transcription-${index}" value="${word.transcription || ''}" placeholder="Транскрипция" style="flex:2">
                     <input type="text" class="edit-input" id="edit-translation-${index}" value="${word.translation}" placeholder="Перевод" style="flex:2">
                     <button class="action-btn" onclick="saveEdit(${index})">💾</button>
                     <button class="action-btn delete" onclick="renderList()">✕</button>
                 `;
-                
                 document.getElementById(`edit-word-${index}`).focus();
             }
             
@@ -669,17 +646,8 @@
                 const newWord = document.getElementById(`edit-word-${index}`).value.trim();
                 const newTranscription = document.getElementById(`edit-transcription-${index}`).value.trim();
                 const newTranslation = document.getElementById(`edit-translation-${index}`).value.trim();
-                
-                if (!newWord || !newTranslation) {
-                    alert('Заполни поля "Слово" и "Перевод"');
-                    return;
-                }
-                
-                activeSet.words[index] = { 
-                    word: newWord, 
-                    transcription: newTranscription,
-                    translation: newTranslation 
-                };
+                if (!newWord || !newTranslation) { alert('Заполни поля "Слово" и "Перевод"'); return; }
+                activeSet.words[index] = { word: newWord, transcription: newTranscription, translation: newTranslation };
                 saveSets();
                 renderList();
             }
@@ -694,11 +662,7 @@
             function startTraining() {
                 const container = document.getElementById('trainContent');
                 const activeSet = getActiveSet();
-                
-                if (!activeSet || activeSet.words.length === 0) {
-                    container.innerHTML = '<div class="empty">Сначала добавь слова в сет</div>';
-                    return;
-                }
+                if (!activeSet || activeSet.words.length === 0) { container.innerHTML = '<div class="empty">Сначала добавь слова в сет</div>'; return; }
                 
                 trainQueue = [...activeSet.words];
                 for (let i = trainQueue.length - 1; i > 0; i--) {
@@ -712,20 +676,11 @@
             function renderTrainCard() {
                 const container = document.getElementById('trainContent');
                 const activeSet = getActiveSet();
-                
                 if (trainIndex >= trainQueue.length) {
-                    container.innerHTML = `
-                        <div class="results">
-                            <h2>🎉 Тренировка завершена!</h2>
-                            <div class="label">Ты прошёл все ${trainQueue.length} карточек</div>
-                            <button class="primary" onclick="startTraining()">🔄 Начать заново</button>
-                        </div>
-                    `;
+                    container.innerHTML = `<div class="results"><h2>🎉 Тренировка завершена!</h2><div class="label">Ты прошёл все ${trainQueue.length} карточек</div><button class="primary" onclick="startTraining()">🔄 Начать заново</button></div>`;
                     return;
                 }
-                
                 const currentCard = trainQueue[trainIndex];
-                
                 container.innerHTML = `
                     <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div>
                     <div class="progress">Карточка ${trainIndex + 1} из ${trainQueue.length}</div>
@@ -742,7 +697,6 @@
                 const container = document.getElementById('trainContent');
                 const currentCard = trainQueue[trainIndex];
                 const activeSet = getActiveSet();
-                
                 container.innerHTML = `
                     <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div>
                     <div class="progress">Карточка ${trainIndex + 1} из ${trainQueue.length}</div>
@@ -752,7 +706,7 @@
                         <div class="front">${currentCard.word}</div>
                         <div class="back">${currentCard.translation}</div>
                     </div>
-                    <div class="actions">
+                    <div class="actions-row">
                         <button class="btn-fail" onclick="nextTrainCard()">❌ Не знал</button>
                         <button class="btn-success" onclick="nextTrainCard()">✅ Знал</button>
                     </div>
@@ -764,28 +718,14 @@
             function showTestMenu() {
                 const container = document.getElementById('testContent');
                 const activeSet = getActiveSet();
-                
-                if (!activeSet || activeSet.words.length < 4) {
-                    container.innerHTML = '<div class="empty">Нужно минимум 4 слова в активном сете</div>';
-                    return;
-                }
-                
+                if (!activeSet || activeSet.words.length < 4) { container.innerHTML = '<div class="empty">Нужно минимум 4 слова в активном сете</div>'; return; }
                 container.innerHTML = `
                     <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div>
-                    <div class="hint">Выбери тип задания. Тест будет из 10 вопросов.</div>
+                    <div class="hint">Выбери тип задания (10 вопросов):</div>
                     <div class="test-menu">
-                        <button class="test-option" onclick="startTest(1)">
-                            <div class="title">1️⃣ Выбрать перевод</div>
-                            <div class="desc">Показываем слово — выбери правильный перевод из 4 вариантов</div>
-                        </button>
-                        <button class="test-option" onclick="startTest(2)">
-                            <div class="title">2️⃣ Верный / Неверный</div>
-                            <div class="desc">Показываем слово и перевод — угадай, правильно ли</div>
-                        </button>
-                        <button class="test-option" onclick="startTest(3)">
-                            <div class="title">3️⃣ Вписать слово</div>
-                            <div class="desc">Показываем перевод — впиши слово на иностранном языке</div>
-                        </button>
+                        <button class="test-option" onclick="startTest(1)"><div class="title">1️⃣ Выбрать перевод</div><div class="desc">Показываем слово — выбери правильный перевод из 4 вариантов</div></button>
+                        <button class="test-option" onclick="startTest(2)"><div class="title">2️⃣ Верный / Неверный</div><div class="desc">Показываем слово и перевод — угадай, правильно ли</div></button>
+                        <button class="test-option" onclick="startTest(3)"><div class="title">3️⃣ Вписать слово</div><div class="desc">Показываем перевод — впиши слово на иностранном языке</div></button>
                     </div>
                 `;
             }
@@ -803,10 +743,8 @@
             function nextQuestion() {
                 const activeSet = getActiveSet();
                 if (testPassed >= testTotal) { showResults(); return; }
-                
                 answered = false;
                 const correctWord = activeSet.words[Math.floor(Math.random() * activeSet.words.length)];
-                
                 if (currentTestType === 1) renderTest1(correctWord);
                 else if (currentTestType === 2) renderTest2(correctWord);
                 else if (currentTestType === 3) renderTest3(correctWord);
@@ -815,22 +753,18 @@
             function renderTest1(correctWord) {
                 const container = document.getElementById('testContent');
                 const activeSet = getActiveSet();
-                
                 const wrongOptions = [];
                 const pool = activeSet.words.filter(w => w.translation !== correctWord.translation);
                 while (wrongOptions.length < 3 && pool.length > 0) {
                     const idx = Math.floor(Math.random() * pool.length);
                     wrongOptions.push(pool.splice(idx, 1)[0]);
                 }
-                
                 const allOptions = [correctWord, ...wrongOptions];
                 for (let i = allOptions.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [allOptions[i], allOptions[j]] = [allOptions[j], allOptions[i]];
                 }
-                
                 currentQuestion = { correct: correctWord, options: allOptions };
-                
                 container.innerHTML = `
                     <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div>
                     <div class="progress">Вопрос ${testPassed + 1} из ${testTotal} · Правильных: ${testCorrect}</div>
@@ -854,20 +788,14 @@
             function checkTest1(index) {
                 if (answered) return;
                 answered = true;
-                
                 const selected = currentQuestion.options[index];
                 const isCorrect = selected.translation === currentQuestion.correct.translation;
-                
                 const buttons = document.querySelectorAll('.option-btn');
                 buttons.forEach((btn, i) => {
-                    if (currentQuestion.options[i].translation === currentQuestion.correct.translation) {
-                        btn.classList.add('correct');
-                    } else if (i === index && !isCorrect) {
-                        btn.classList.add('wrong');
-                    }
+                    if (currentQuestion.options[i].translation === currentQuestion.correct.translation) btn.classList.add('correct');
+                    else if (i === index && !isCorrect) btn.classList.add('wrong');
                     btn.onclick = null;
                 });
-                
                 if (isCorrect) testCorrect++;
                 testPassed++;
                 setTimeout(nextQuestion, 1200);
@@ -876,20 +804,9 @@
             function renderTest2(correctWord) {
                 const container = document.getElementById('testContent');
                 const activeSet = getActiveSet();
-                
                 const isTruePair = Math.random() < 0.5;
-                let shownTranslation;
-                
-                if (isTruePair) {
-                    shownTranslation = correctWord.translation;
-                } else {
-                    const pool = activeSet.words.filter(w => w.translation !== correctWord.translation);
-                    const wrong = pool[Math.floor(Math.random() * pool.length)];
-                    shownTranslation = wrong.translation;
-                }
-                
+                let shownTranslation = isTruePair ? correctWord.translation : activeSet.words.filter(w => w.translation !== correctWord.translation)[Math.floor(Math.random() * activeSet.words.filter(w => w.translation !== correctWord.translation).length)].translation;
                 currentQuestion = { correct: correctWord, isTruePair, shownTranslation };
-                
                 container.innerHTML = `
                     <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div>
                     <div class="progress">Вопрос ${testPassed + 1} из ${testTotal} · Правильных: ${testCorrect}</div>
@@ -899,7 +816,7 @@
                         <div class="front">${correctWord.word}</div>
                         <div class="back">${shownTranslation}</div>
                     </div>
-                    <div class="actions">
+                    <div class="actions-row">
                         <button class="btn-fail" onclick="checkTest2(false)">❌ Неверно</button>
                         <button class="btn-success" onclick="checkTest2(true)">✅ Верно</button>
                     </div>
@@ -910,27 +827,21 @@
             function checkTest2(userSaysTrue) {
                 if (answered) return;
                 answered = true;
-                
                 const isCorrect = userSaysTrue === currentQuestion.isTruePair;
                 if (isCorrect) testCorrect++;
                 testPassed++;
-                
-                const buttons = document.querySelectorAll('.actions button');
+                const buttons = document.querySelectorAll('.actions-row button');
                 buttons.forEach(b => b.disabled = true);
-                
                 const feedback = document.createElement('div');
                 feedback.className = 'feedback ' + (isCorrect ? 'correct' : 'wrong');
                 feedback.textContent = isCorrect ? '✅ Правильно!' : `❌ Ошибка.`;
-                document.querySelector('#testContent .actions').after(feedback);
-                
+                document.querySelector('#testContent .actions-row').after(feedback);
                 setTimeout(nextQuestion, 1200);
             }
             
             function renderTest3(correctWord) {
                 const container = document.getElementById('testContent');
-                const activeSet = getActiveSet();
                 currentQuestion = { correct: correctWord };
-                
                 container.innerHTML = `
                     <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div>
                     <div class="progress">Вопрос ${testPassed + 1} из ${testTotal} · Правильных: ${testCorrect}</div>
@@ -943,37 +854,27 @@
                     <button class="primary" onclick="checkTest3()">Проверить</button>
                     <button class="primary" style="background:#888;" onclick="showTestMenu()">← Выйти в меню</button>
                 `;
-                
                 const input = document.getElementById('answerInput');
                 input.focus();
-                input.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') checkTest3();
-                });
+                input.addEventListener('keypress', (e) => { if (e.key === 'Enter') checkTest3(); });
             }
             
             function checkTest3() {
                 if (answered) return;
-                
                 const input = document.getElementById('answerInput');
                 const userAnswer = input.value.trim().toLowerCase();
                 const correctAnswer = currentQuestion.correct.word.toLowerCase();
-                
                 if (userAnswer === '') return;
-                
                 answered = true;
                 const isCorrect = userAnswer === correctAnswer;
-                
                 input.classList.add(isCorrect ? 'correct' : 'wrong');
                 input.disabled = true;
-                
                 if (isCorrect) testCorrect++;
                 testPassed++;
-                
                 const feedback = document.createElement('div');
                 feedback.className = 'feedback ' + (isCorrect ? 'correct' : 'wrong');
                 feedback.textContent = isCorrect ? '✅ Правильно!' : `❌ Правильный ответ: ${currentQuestion.correct.word}`;
                 input.after(feedback);
-                
                 setTimeout(nextQuestion, 1500);
             }
             
@@ -981,12 +882,9 @@
                 const container = document.getElementById('testContent');
                 const activeSet = getActiveSet();
                 const percent = Math.round((testCorrect / testTotal) * 100);
-                
-                let emoji = '🎉';
-                let message = 'Отличный результат!';
+                let emoji = '🎉', message = 'Отличный результат!';
                 if (percent < 50) { emoji = '💪'; message = 'Нужно ещё попрактиковаться!'; }
                 else if (percent < 80) { emoji = '👍'; message = 'Хороший результат!'; }
-                
                 container.innerHTML = `
                     <div class="results">
                         <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div>
