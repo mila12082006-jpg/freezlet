@@ -19,14 +19,15 @@
             .word-item .action-btn.speak { background: #51cf66; }
             .empty { text-align: center; padding: 40px; color: #999; }
             
-            body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-family: 'Arial', sans-serif; margin: 0; padding: 20px; padding-bottom: 80px; /* Отступ для нижней панели на мобильных */ }
+            body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-family: 'Arial', sans-serif; margin: 0; padding: 20px; padding-bottom: 80px; }
             .container { max-width: 700px; margin: 0 auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
             
-            /* Верхние вкладки (для десктопа) */
-            .tabs { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 10px; flex-wrap: wrap; }
+            /* Верхняя навигация (для десктопа) */
+            .tabs { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
             .nav-btn { background: none; border: none; padding: 12px 20px; cursor: pointer; font-size: 16px; color: #888; border-bottom: 3px solid transparent; transition: all 0.3s; }
             .nav-btn:hover { color: #667eea; }
             .nav-btn.active { color: #667eea; border-bottom-color: #667eea; font-weight: 600; }
+            .nav-btn.add-btn { margin-left: auto; color: #667eea; font-size: 24px; padding: 8px 16px; }
             
             h1 { text-align: center; color: #667eea; margin-bottom: 25px; font-family: 'Verdana', sans-serif; }
             
@@ -82,16 +83,11 @@
             .results .score { font-size: 48px; font-weight: 700; color: #667eea; margin: 20px 0; }
             .results .label { color: #666; font-size: 16px; }
             
-            .set-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-            .set-item { background: #f9f9f9; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.2s; border: 2px solid transparent; }
-            .set-item:hover { border-color: #667eea; background: #f5f5ff; }
-            .set-item.active { border-color: #667eea; background: #eeeaff; }
-            .set-item .set-info { flex: 1; }
-            .set-item .set-name { font-weight: 600; color: #333; font-size: 16px; }
-            .set-item .set-count { color: #888; font-size: 13px; margin-top: 3px; }
-            .set-item .set-actions { display: flex; gap: 8px; }
-            .set-item .set-btn { background: #667eea; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
-            .set-item .set-btn.delete { background: #ff4757; }
+            .set-selector { background: #f5f5ff; padding: 12px; border-radius: 10px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+            .set-selector:hover { background: #eeeaff; }
+            .set-selector .label { color: #666; font-size: 13px; }
+            .set-selector .name { color: #667eea; font-weight: 600; font-size: 15px; flex: 1; }
+            .set-selector .arrow { color: #888; }
             
             .set-input { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px; margin-bottom: 10px; box-sizing: border-box; }
             .set-input:focus { outline: none; border-color: #667eea; }
@@ -122,56 +118,29 @@
             .pdf-loading .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #eee; border-top-color: #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 10px; vertical-align: middle; }
             @keyframes spin { to { transform: rotate(360deg); } }
 
-            /* ========================================= */
-            /* НИЖНЯЯ ПАНЕЛЬ НАВИГАЦИИ (ДЛЯ МОБИЛЬНЫХ)   */
-            /* ========================================= */
-            .bottom-nav {
-                display: none; /* Скрыта на десктопе */
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                background: white;
-                box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
-                z-index: 1000;
-                padding-bottom: env(safe-area-inset-bottom); /* Для iPhone с челкой */
-            }
-            .bottom-nav-items {
-                display: flex;
-                justify-content: space-around;
-                padding: 8px 0;
-            }
-            .bottom-nav-item {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                background: none;
-                border: none;
-                color: #888;
-                font-size: 10px;
-                cursor: pointer;
-                padding: 5px;
-                flex: 1;
-                transition: color 0.2s;
-            }
-            .bottom-nav-item .icon {
-                font-size: 22px;
-                margin-bottom: 3px;
-            }
-            .bottom-nav-item.active {
-                color: #667eea;
-            }
+            /* Модальное окно */
+            .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; }
+            .modal.active { display: flex; }
+            .modal-content { background: white; border-radius: 15px; padding: 30px; max-width: 400px; width: 90%; max-height: 80vh; overflow-y: auto; }
+            .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+            .modal-header h3 { margin: 0; color: #333; }
+            .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #888; padding: 0; width: 30px; height: 30px; }
 
-            /* ========================================= */
-            /* АДАПТИВНОСТЬ                              */
-            /* ========================================= */
+            /* Нижняя панель навигации (для мобильных) */
+            .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: white; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+            .bottom-nav-items { display: flex; justify-content: space-around; padding: 8px 0; }
+            .bottom-nav-item { display: flex; flex-direction: column; align-items: center; background: none; border: none; color: #888; font-size: 10px; cursor: pointer; padding: 5px; flex: 1; transition: color 0.2s; }
+            .bottom-nav-item .icon { font-size: 22px; margin-bottom: 3px; }
+            .bottom-nav-item.active { color: #667eea; }
+            .bottom-nav-item.add-btn { color: #667eea; }
+
+            /* Адаптивность */
             @media (max-width: 768px) {
                 body { padding: 10px; padding-bottom: 80px; }
                 .container { padding: 20px; border-radius: 15px; }
                 h1 { font-size: 22px; margin-bottom: 15px; }
                 h2 { font-size: 18px; }
                 
-                /* Скрываем верхние вкладки, показываем нижние */
                 .tabs { display: none; }
                 .bottom-nav { display: block; }
                 
@@ -186,10 +155,6 @@
                 .word-item .translation { font-size: 13px; display: block; margin-left: 0; margin-top: 3px; }
                 .word-item .actions { flex-direction: column; gap: 3px; }
                 .word-item .action-btn { padding: 6px 8px; font-size: 11px; }
-                
-                .set-item { padding: 12px; }
-                .set-item .set-name { font-size: 15px; }
-                .set-item .set-actions { flex-direction: column; gap: 5px; }
                 
                 .test-option { padding: 15px; }
                 .option-btn { padding: 12px; font-size: 15px; }
@@ -211,7 +176,6 @@
                 .actions-row { gap: 8px; }
                 .actions-row button { padding: 10px; font-size: 14px; }
                 
-                /* Список слов - вертикальная компоновка */
                 .word-item { flex-direction: column; align-items: flex-start; gap: 8px; }
                 .word-item .word-main { width: 100%; }
                 .word-item .word { font-size: 15px; display: block; }
@@ -221,10 +185,6 @@
                 .word-item .action-btn { padding: 8px 12px; font-size: 12px; }
                 
                 .edit-input { width: 100%; margin-right: 0; font-size: 13px; }
-                
-                .set-item { flex-direction: column; align-items: flex-start; gap: 10px; }
-                .set-item .set-info { width: 100%; }
-                .set-item .set-actions { width: 100%; justify-content: flex-end; flex-direction: row; }
                 
                 textarea { font-size: 13px; padding: 12px; }
                 .set-input { font-size: 14px; padding: 10px; }
@@ -252,6 +212,8 @@
                 .progress { font-size: 13px; margin-bottom: 10px; }
                 .hint { padding: 10px; font-size: 12px; }
                 .active-set-badge { font-size: 12px; padding: 5px 10px; }
+                
+                .modal-content { padding: 20px; }
             }
         </style>
     </head>
@@ -260,33 +222,43 @@
         <div class="container">
             <h1>Мозгосайт</h1>
             
-            <!-- Верхняя навигация (только для десктопа) -->
+            <!-- Верхняя навигация (для десктопа) -->
             <div class="tabs">
-                <button class="nav-btn" data-screen="sets" onclick="showScreen('sets')">📚 Сеты</button>
-                <button class="nav-btn" data-screen="import" onclick="showScreen('import')">📥 Импорт</button>
                 <button class="nav-btn" data-screen="list" onclick="showScreen('list')">📋 Список</button>
                 <button class="nav-btn" data-screen="train" onclick="showScreen('train')">🎴 Тренировка</button>
                 <button class="nav-btn" data-screen="test" onclick="showScreen('test')">📝 Тест</button>
+                <button class="nav-btn add-btn" onclick="openModal()">+</button>
             </div>
             
-            <div id="sets"><h2>Твои сеты</h2><div id="setsContent"></div></div>
-            <div id="import"><h2>Импорт слов</h2><div id="importContent"></div></div>
             <div id="list"><h2>Список слов</h2><div id="listContent"></div></div>
             <div id="train"><h2>Тренировка</h2><div id="trainContent"></div></div>
             <div id="test"><h2>Тест</h2><div id="testContent"></div></div>
         </div>
 
-        <!-- Нижняя навигация (только для мобильных) -->
+        <!-- Модальное окно создания сета -->
+        <div class="modal" id="createSetModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Создать новый сет</h3>
+                    <button class="modal-close" onclick="closeModal()">×</button>
+                </div>
+                <input type="text" class="set-input" id="newSetName" placeholder="Название сета...">
+                <div style="font-size: 13px; color: #666; margin-bottom: 8px;">Выбери язык:</div>
+                <div class="lang-selector">
+                    <div class="lang-option selected" data-lang="en" onclick="selectNewSetLang('en')">
+                        <span class="flag">🇬🇧</span>Английский
+                    </div>
+                    <div class="lang-option" data-lang="de" onclick="selectNewSetLang('de')">
+                        <span class="flag">🇩🇪</span>Немецкий
+                    </div>
+                </div>
+                <button class="primary" onclick="createSet()">➕ Создать и добавить слова</button>
+            </div>
+        </div>
+
+        <!-- Нижняя навигация (для мобильных) -->
         <nav class="bottom-nav">
             <div class="bottom-nav-items">
-                <button class="bottom-nav-item" data-screen="sets" onclick="showScreen('sets')">
-                    <span class="icon">📚</span>
-                    <span>Сеты</span>
-                </button>
-                <button class="bottom-nav-item" data-screen="import" onclick="showScreen('import')">
-                    <span class="icon">📥</span>
-                    <span>Импорт</span>
-                </button>
                 <button class="bottom-nav-item" data-screen="list" onclick="showScreen('list')">
                     <span class="icon">📋</span>
                     <span>Список</span>
@@ -298,6 +270,10 @@
                 <button class="bottom-nav-item" data-screen="test" onclick="showScreen('test')">
                     <span class="icon">📝</span>
                     <span>Тест</span>
+                </button>
+                <button class="bottom-nav-item add-btn" onclick="openModal()">
+                    <span class="icon">➕</span>
+                    <span>Новый</span>
                 </button>
             </div>
         </nav>
@@ -384,14 +360,11 @@
             }
             
             function showScreen(id) {
-                // Скрываем все экраны
-                ['sets', 'import', 'list', 'train', 'test'].forEach(screen => {
+                ['list', 'train', 'test'].forEach(screen => {
                     document.getElementById(screen).style.display = 'none';
                 });
-                // Показываем нужный
                 document.getElementById(id).style.display = 'block';
                 
-                // Обновляем активный класс у кнопок (и верхних, и нижних)
                 document.querySelectorAll('.nav-btn, .bottom-nav-item').forEach(btn => {
                     btn.classList.remove('active');
                     if (btn.getAttribute('data-screen') === id) {
@@ -399,106 +372,53 @@
                     }
                 });
                 
-                if (id === 'sets') renderSets();
-                if (id === 'import') renderImport();
                 if (id === 'list') renderList();
                 if (id === 'train') startTraining();
                 if (id === 'test') showTestMenu();
             }
             
-            showScreen('sets');
-            
-            function getActiveSet() {
-                return sets.find(s => s.id === activeSetId);
+            // Модальное окно
+            function openModal() {
+                document.getElementById('createSetModal').classList.add('active');
+                document.getElementById('newSetName').value = '';
+                document.getElementById('newSetName').focus();
             }
             
-            function saveSets() {
-                localStorage.setItem('sets', JSON.stringify(sets));
+            function closeModal() {
+                document.getElementById('createSetModal').classList.remove('active');
             }
             
-            function renderSets() {
-                const container = document.getElementById('setsContent');
-                if (sets.length === 0) {
-                    container.innerHTML = `<div class="empty">Пока нет сетов. Создай первый!</div>${renderCreateSetForm()}`;
-                    return;
-                }
-                container.innerHTML = `
-                    ${renderCreateSetForm()}
-                    <div class="set-list">
-                        ${sets.map(set => `
-                            <div class="set-item ${set.id === activeSetId ? 'active' : ''}" onclick="selectSet(${set.id})">
-                                <div class="set-info">
-                                    <div class="set-name">${LANGS[set.lang].flag} ${set.name}</div>
-                                    <div class="set-count">${set.words.length} слов · ${LANGS[set.lang].name}</div>
-                                </div>
-                                <div class="set-actions">
-                                    <button class="set-btn" onclick="event.stopPropagation(); toggleSetLang(${set.id})" title="Сменить язык">${LANGS[set.lang].flag}</button>
-                                    <button class="set-btn" onclick="event.stopPropagation(); renameSet(${set.id})">✏️</button>
-                                    <button class="set-btn delete" onclick="event.stopPropagation(); deleteSet(${set.id})">🗑</button>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
+            function selectNewSetLang(lang) {
+                newSetLang = lang;
+                document.querySelectorAll('.lang-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                    if (opt.getAttribute('data-lang') === lang) {
+                        opt.classList.add('selected');
+                    }
+                });
             }
-            
-            function renderCreateSetForm() {
-                return `
-                    <input type="text" class="set-input" id="newSetName" placeholder="Название нового сета...">
-                    <div style="font-size: 13px; color: #666; margin-bottom: 8px;">Выбери язык:</div>
-                    <div class="lang-selector">
-                        <div class="lang-option ${newSetLang === 'en' ? 'selected' : ''}" onclick="selectNewSetLang('en')">
-                            <span class="flag">🇬🇧</span>Английский
-                        </div>
-                        <div class="lang-option ${newSetLang === 'de' ? 'selected' : ''}" onclick="selectNewSetLang('de')">
-                            <span class="flag">🇩🇪</span>Немецкий
-                        </div>
-                    </div>
-                    <button class="primary" onclick="createSet()" style="margin-bottom: 20px;">➕ Создать сет</button>
-                `;
-            }
-            
-            function selectNewSetLang(lang) { newSetLang = lang; renderSets(); }
             
             function createSet() {
                 const input = document.getElementById('newSetName');
                 const name = input.value.trim();
                 if (!name) { alert('Введи название сета'); return; }
+                
                 const newSet = { id: Date.now(), name, lang: newSetLang, words: [] };
                 sets.push(newSet);
                 activeSetId = newSet.id;
                 saveSets();
-                renderSets();
+                closeModal();
+                
+                // Сразу показываем экран импорта
+                showImportScreen();
             }
             
-            function selectSet(id) { activeSetId = id; saveSets(); renderSets(); }
-            
-            function renameSet(id) {
-                const set = sets.find(s => s.id === id);
-                const newName = prompt('Новое название:', set.name);
-                if (newName && newName.trim()) { set.name = newName.trim(); saveSets(); renderSets(); }
-            }
-            
-            function toggleSetLang(id) {
-                const set = sets.find(s => s.id === id);
-                set.lang = set.lang === 'en' ? 'de' : 'en';
-                saveSets();
-                renderSets();
-            }
-            
-            function deleteSet(id) {
-                if (!confirm('Удалить этот сет? Все слова будут потеряны.')) return;
-                sets = sets.filter(s => s.id !== id);
-                if (activeSetId === id) activeSetId = sets.length > 0 ? sets[0].id : null;
-                saveSets();
-                renderSets();
-            }
-            
-            function renderImport() {
-                const container = document.getElementById('importContent');
-                if (!activeSetId) { container.innerHTML = '<div class="empty">Сначала создай сет во вкладке "Сеты"</div>'; return; }
+            function showImportScreen() {
                 const activeSet = getActiveSet();
-                container.innerHTML = `
+                if (!activeSet) return;
+                
+                // Создаем временный контейнер для импорта
+                const importHTML = `
                     <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name} · ${LANGS[activeSet.lang].name}</div>
                     <div class="import-sources">
                         <div class="source-btn ${importSource === 'text' ? 'active' : ''}" onclick="switchImportSource('text')">
@@ -509,11 +429,27 @@
                         </div>
                     </div>
                     <div id="importBody"></div>
+                    <button class="primary" style="background:#888; margin-top: 20px;" onclick="showScreen('list')">← Перейти к списку</button>
                 `;
+                
+                // Показываем импорт вместо списка
+                document.getElementById('list').style.display = 'block';
+                document.getElementById('listContent').innerHTML = importHTML;
                 renderImportBody();
             }
             
-            function switchImportSource(source) { importSource = source; renderImport(); }
+            function getActiveSet() {
+                return sets.find(s => s.id === activeSetId);
+            }
+            
+            function saveSets() {
+                localStorage.setItem('sets', JSON.stringify(sets));
+            }
+            
+            function switchImportSource(source) { 
+                importSource = source; 
+                showImportScreen();
+            }
             
             function renderImportBody() {
                 const body = document.getElementById('importBody');
@@ -595,19 +531,33 @@
                 saveSets();
                 extractedPdfText = '';
                 alert(`✅ Импортировано слов: ${added}`);
-                renderImport();
+                showScreen('list');
             }
             
             function renderList() {
                 const container = document.getElementById('listContent');
                 const activeSet = getActiveSet();
-                if (!activeSet) { container.innerHTML = '<div class="empty">Сначала создай сет</div>'; return; }
-                if (activeSet.words.length === 0) {
-                    container.innerHTML = `<div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div><div class="empty">В этом сете пока нет слов.</div>`;
+                
+                if (!activeSet) {
+                    container.innerHTML = '<div class="empty">Нет сетов. Нажми "+" чтобы создать первый!</div>';
                     return;
                 }
-                container.innerHTML = `
-                    <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name} · ${activeSet.words.length} слов</div>
+                
+                // Селектор активного сета
+                const setSelector = `
+                    <div class="set-selector" onclick="cycleActiveSet()">
+                        <span class="label">Сет:</span>
+                        <span class="name">${LANGS[activeSet.lang].flag} ${activeSet.name}</span>
+                        <span class="arrow">↻</span>
+                    </div>
+                `;
+                
+                if (activeSet.words.length === 0) {
+                    container.innerHTML = setSelector + `<div class="empty">В этом сете пока нет слов.<br><br><button class="primary" onclick="showImportScreen()">➕ Добавить слова</button></div>`;
+                    return;
+                }
+                
+                container.innerHTML = setSelector + `
                     <div class="word-list">
                         ${activeSet.words.map((w, i) => `
                             <div class="word-item" id="word-${i}">
@@ -624,7 +574,17 @@
                             </div>
                         `).join('')}
                     </div>
+                    <button class="primary" onclick="showImportScreen()">➕ Добавить ещё слова</button>
                 `;
+            }
+            
+            function cycleActiveSet() {
+                if (sets.length === 0) return;
+                const currentIndex = sets.findIndex(s => s.id === activeSetId);
+                const nextIndex = (currentIndex + 1) % sets.length;
+                activeSetId = sets[nextIndex].id;
+                saveSets();
+                renderList();
             }
             
             function editWord(index) {
@@ -662,7 +622,16 @@
             function startTraining() {
                 const container = document.getElementById('trainContent');
                 const activeSet = getActiveSet();
-                if (!activeSet || activeSet.words.length === 0) { container.innerHTML = '<div class="empty">Сначала добавь слова в сет</div>'; return; }
+                
+                if (!activeSet) {
+                    container.innerHTML = '<div class="empty">Нет сетов. Нажми "+" чтобы создать первый!</div>';
+                    return;
+                }
+                
+                if (activeSet.words.length === 0) {
+                    container.innerHTML = `<div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div><div class="empty">Сначала добавь слова в сет</div>`;
+                    return;
+                }
                 
                 trainQueue = [...activeSet.words];
                 for (let i = trainQueue.length - 1; i > 0; i--) {
@@ -718,7 +687,17 @@
             function showTestMenu() {
                 const container = document.getElementById('testContent');
                 const activeSet = getActiveSet();
-                if (!activeSet || activeSet.words.length < 4) { container.innerHTML = '<div class="empty">Нужно минимум 4 слова в активном сете</div>'; return; }
+                
+                if (!activeSet) {
+                    container.innerHTML = '<div class="empty">Нет сетов. Нажми "+" чтобы создать первый!</div>';
+                    return;
+                }
+                
+                if (activeSet.words.length < 4) {
+                    container.innerHTML = `<div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div><div class="empty">Нужно минимум 4 слова в активном сете</div>`;
+                    return;
+                }
+                
                 container.innerHTML = `
                     <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div>
                     <div class="hint">Выбери тип задания (10 вопросов):</div>
@@ -897,6 +876,9 @@
                     </div>
                 `;
             }
+            
+            // Инициализация
+            showScreen('list');
         </script>
     </body>
 </html>
