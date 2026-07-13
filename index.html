@@ -3,10 +3,9 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-        <title>Мозгосайт</title>
+        <title>Freezlet</title>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
         <style>
-            /* Базовые стили */
             .word-list { max-height: 400px; overflow-y: auto; }
             .word-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f9f9f9; border-radius: 8px; margin-bottom: 8px; gap: 10px; }
             .word-item .word-main { flex: 1; min-width: 0; }
@@ -22,7 +21,6 @@
             body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-family: 'Arial', sans-serif; margin: 0; padding: 20px; padding-bottom: 80px; }
             .container { max-width: 700px; margin: 0 auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
             
-            /* Верхняя навигация (для десктопа) */
             .tabs { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
             .nav-btn { background: none; border: none; padding: 12px 20px; cursor: pointer; font-size: 16px; color: #888; border-bottom: 3px solid transparent; transition: all 0.3s; }
             .nav-btn:hover { color: #667eea; }
@@ -30,6 +28,7 @@
             .nav-btn.add-btn { margin-left: auto; color: #667eea; font-size: 24px; padding: 8px 16px; }
             
             h1 { text-align: center; color: #667eea; margin-bottom: 25px; font-family: 'Verdana', sans-serif; }
+            h2 { color: #333; margin-bottom: 15px; }
             
             button.primary { background: #667eea; color: white; border: none; padding: 12px 24px; border-radius: 10px; font-size: 15px; cursor: pointer; width: 100%; margin-top: 15px; }
             button.primary:hover { background: #5568d3; }
@@ -39,7 +38,6 @@
             .card .front { font-size: 28px; font-weight: 600; }
             .card .back { font-size: 22px; margin-top: 15px; opacity: 0.9; }
             .card .speak-btn { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 18px; }
-            .card .speak-btn:hover { background: rgba(255,255,255,0.3); }
             
             .actions-row { display: flex; gap: 10px; }
             .actions-row button { flex: 1; padding: 15px; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; font-weight: 600; }
@@ -50,8 +48,6 @@
             
             textarea { width: 100%; padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; font-family: monospace; resize: vertical; box-sizing: border-box; }
             textarea:focus { outline: none; border-color: #667eea; }
-            
-            h2 { color: #333; margin-bottom: 15px; }
             
             .progress { text-align: center; color: #888; margin-bottom: 15px; font-size: 14px; }
             .progress-bar { height: 6px; background: #eee; border-radius: 3px; overflow: hidden; margin-bottom: 20px; }
@@ -83,12 +79,6 @@
             .results .score { font-size: 48px; font-weight: 700; color: #667eea; margin: 20px 0; }
             .results .label { color: #666; font-size: 16px; }
             
-            .set-selector { background: #f5f5ff; padding: 12px; border-radius: 10px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
-            .set-selector:hover { background: #eeeaff; }
-            .set-selector .label { color: #666; font-size: 13px; }
-            .set-selector .name { color: #667eea; font-weight: 600; font-size: 15px; flex: 1; }
-            .set-selector .arrow { color: #888; }
-            
             .set-input { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px; margin-bottom: 10px; box-sizing: border-box; }
             .set-input:focus { outline: none; border-color: #667eea; }
             
@@ -112,11 +102,31 @@
             .pdf-drop-zone:hover { background: #eeeaff; }
             .pdf-drop-zone .icon { font-size: 40px; margin-bottom: 10px; }
             .pdf-drop-zone .text { color: #666; font-size: 14px; }
-            .pdf-drop-zone .filename { color: #667eea; font-weight: 600; margin-top: 10px; }
             
             .pdf-loading { text-align: center; padding: 20px; color: #667eea; }
             .pdf-loading .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #eee; border-top-color: #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 10px; vertical-align: middle; }
             @keyframes spin { to { transform: rotate(360deg); } }
+
+            /* Папки и сеты */
+            .folder-list { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
+            .folder { background: #f9f9f9; border-radius: 12px; padding: 15px; border: 2px solid transparent; }
+            .folder-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+            .folder-name { font-weight: 600; font-size: 16px; color: #333; display: flex; align-items: center; gap: 8px; }
+            .folder-name .emoji { font-size: 20px; }
+            .folder-actions { display: flex; gap: 5px; }
+            .folder-actions button { background: #667eea; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 11px; }
+            .folder-actions .delete { background: #ff4757; }
+            
+            .sets-in-folder { display: flex; flex-direction: column; gap: 8px; margin-left: 20px; }
+            .set-item { background: white; padding: 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: 2px solid transparent; display: flex; justify-content: space-between; align-items: center; }
+            .set-item:hover { border-color: #667eea; }
+            .set-item.active { border-color: #667eea; background: #eeeaff; }
+            .set-item .set-info { flex: 1; }
+            .set-item .set-name { font-weight: 600; color: #333; font-size: 14px; }
+            .set-item .set-count { color: #888; font-size: 12px; margin-top: 2px; }
+            .set-item .set-actions { display: flex; gap: 5px; }
+            .set-item .set-btn { background: #667eea; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; }
+            .set-item .set-btn.delete { background: #ff4757; }
 
             /* Модальное окно */
             .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; }
@@ -126,7 +136,19 @@
             .modal-header h3 { margin: 0; color: #333; }
             .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #888; padding: 0; width: 30px; height: 30px; }
 
-            /* Нижняя панель навигации (для мобильных) */
+            .create-options { display: flex; flex-direction: column; gap: 12px; }
+            .create-option { background: #f5f5ff; padding: 20px; border-radius: 12px; cursor: pointer; transition: all 0.3s; border: 2px solid transparent; text-align: left; }
+            .create-option:hover { border-color: #667eea; background: #eeeaff; }
+            .create-option .icon { font-size: 32px; margin-bottom: 10px; }
+            .create-option .title { font-weight: 600; color: #667eea; font-size: 16px; margin-bottom: 5px; }
+            .create-option .desc { font-size: 13px; color: #666; }
+
+            .folder-selector { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+            .folder-option { padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.2s; background: white; }
+            .folder-option:hover { border-color: #667eea; }
+            .folder-option.selected { border-color: #667eea; background: #eeeaff; font-weight: 600; }
+
+            /* Нижняя навигация */
             .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: white; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
             .bottom-nav-items { display: flex; justify-content: space-around; padding: 8px 0; }
             .bottom-nav-item { display: flex; flex-direction: column; align-items: center; background: none; border: none; color: #888; font-size: 10px; cursor: pointer; padding: 5px; flex: 1; transition: color 0.2s; }
@@ -160,6 +182,12 @@
                 .option-btn { padding: 12px; font-size: 15px; }
                 
                 .results .score { font-size: 36px; }
+                
+                .folder { padding: 12px; }
+                .folder-name { font-size: 14px; }
+                .sets-in-folder { margin-left: 15px; }
+                .set-item { padding: 10px; }
+                .set-item .set-name { font-size: 13px; }
             }
             
             @media (max-width: 480px) {
@@ -214,20 +242,30 @@
                 .active-set-badge { font-size: 12px; padding: 5px 10px; }
                 
                 .modal-content { padding: 20px; }
+                .create-option { padding: 15px; }
+                .create-option .icon { font-size: 28px; }
+                .create-option .title { font-size: 15px; }
+                
+                .folder { padding: 10px; }
+                .folder-name { font-size: 13px; }
+                .folder-name .emoji { font-size: 18px; }
+                .sets-in-folder { margin-left: 10px; gap: 6px; }
+                .set-item { padding: 8px; }
+                .set-item .set-name { font-size: 12px; }
+                .set-item .set-count { font-size: 11px; }
             }
         </style>
     </head>
     
     <body>
         <div class="container">
-            <h1>Мозгосайт</h1>
+            <h1>Freezlet</h1>
             
-            <!-- Верхняя навигация (для десктопа) -->
             <div class="tabs">
                 <button class="nav-btn" data-screen="list" onclick="showScreen('list')">📋 Список</button>
                 <button class="nav-btn" data-screen="train" onclick="showScreen('train')">🎴 Тренировка</button>
                 <button class="nav-btn" data-screen="test" onclick="showScreen('test')">📝 Тест</button>
-                <button class="nav-btn add-btn" onclick="openModal()">+</button>
+                <button class="nav-btn add-btn" onclick="openCreateModal()">+</button>
             </div>
             
             <div id="list"><h2>Список слов</h2><div id="listContent"></div></div>
@@ -235,14 +273,38 @@
             <div id="test"><h2>Тест</h2><div id="testContent"></div></div>
         </div>
 
-        <!-- Модальное окно создания сета -->
+        <!-- Модальное окно: выбор что создать -->
+        <div class="modal" id="createModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Что создать?</h3>
+                    <button class="modal-close" onclick="closeModal('createModal')">×</button>
+                </div>
+                <div class="create-options">
+                    <div class="create-option" onclick="showCreateSetForm()">
+                        <div class="icon">📚</div>
+                        <div class="title">Новый сет</div>
+                        <div class="desc">Создать набор слов для изучения</div>
+                    </div>
+                    <div class="create-option" onclick="showCreateFolderForm()">
+                        <div class="icon">📁</div>
+                        <div class="title">Новая папка</div>
+                        <div class="desc">Группировать сеты по темам</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно: создание сета -->
         <div class="modal" id="createSetModal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3>Создать новый сет</h3>
-                    <button class="modal-close" onclick="closeModal()">×</button>
+                    <h3>Создать сет</h3>
+                    <button class="modal-close" onclick="closeModal('createSetModal')">×</button>
                 </div>
                 <input type="text" class="set-input" id="newSetName" placeholder="Название сета...">
+                <div style="font-size: 13px; color: #666; margin-bottom: 8px;">Выбери папку:</div>
+                <div class="folder-selector" id="folderSelector"></div>
                 <div style="font-size: 13px; color: #666; margin-bottom: 8px;">Выбери язык:</div>
                 <div class="lang-selector">
                     <div class="lang-option selected" data-lang="en" onclick="selectNewSetLang('en')">
@@ -252,11 +314,22 @@
                         <span class="flag">🇩🇪</span>Немецкий
                     </div>
                 </div>
-                <button class="primary" onclick="createSet()">➕ Создать и добавить слова</button>
+                <button class="primary" onclick="createSet()">➕ Создать</button>
             </div>
         </div>
 
-        <!-- Нижняя навигация (для мобильных) -->
+        <!-- Модальное окно: создание папки -->
+        <div class="modal" id="createFolderModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Создать папку</h3>
+                    <button class="modal-close" onclick="closeModal('createFolderModal')">×</button>
+                </div>
+                <input type="text" class="set-input" id="newFolderName" placeholder="Название папки...">
+                <button class="primary" onclick="createFolder()">📁 Создать папку</button>
+            </div>
+        </div>
+
         <nav class="bottom-nav">
             <div class="bottom-nav-items">
                 <button class="bottom-nav-item" data-screen="list" onclick="showScreen('list')">
@@ -271,7 +344,7 @@
                     <span class="icon">📝</span>
                     <span>Тест</span>
                 </button>
-                <button class="bottom-nav-item add-btn" onclick="openModal()">
+                <button class="bottom-nav-item add-btn" onclick="openCreateModal()">
                     <span class="icon">➕</span>
                     <span>Новый</span>
                 </button>
@@ -281,9 +354,11 @@
         <script>
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
             
+            let folders = [];
             let sets = [];
             let activeSetId = null;
             let newSetLang = 'en';
+            let newSetFolderId = null;
             let importSource = 'text';
             let extractedPdfText = '';
             
@@ -302,11 +377,18 @@
                 'de': { flag: '🇩🇪', name: 'Немецкий', code: 'de-DE' }
             };
             
-            const saved = localStorage.getItem('sets');
-            if (saved) {
-                sets = JSON.parse(saved);
+            // Загрузка данных
+            const savedFolders = localStorage.getItem('folders');
+            if (savedFolders) {
+                folders = JSON.parse(savedFolders);
+            }
+            
+            const savedSets = localStorage.getItem('sets');
+            if (savedSets) {
+                sets = JSON.parse(savedSets);
                 sets.forEach(s => { 
                     if (!s.lang) s.lang = 'en';
+                    if (!s.folderId && folders.length > 0) s.folderId = folders[0].id;
                     if (s.words) s.words.forEach(w => { if (!w.transcription) w.transcription = ''; });
                 });
                 if (sets.length > 0) activeSetId = sets[0].id;
@@ -377,15 +459,49 @@
                 if (id === 'test') showTestMenu();
             }
             
-            // Модальное окно
-            function openModal() {
+            // Модальные окна
+            function openCreateModal() {
+                document.getElementById('createModal').classList.add('active');
+            }
+            
+            function closeModal(modalId) {
+                document.getElementById(modalId).classList.remove('active');
+            }
+            
+            function showCreateSetForm() {
+                closeModal('createModal');
                 document.getElementById('createSetModal').classList.add('active');
                 document.getElementById('newSetName').value = '';
                 document.getElementById('newSetName').focus();
+                
+                // Заполняем селектор папок
+                const selector = document.getElementById('folderSelector');
+                if (folders.length === 0) {
+                    selector.innerHTML = '<div class="hint">Сначала создай папку</div>';
+                    newSetFolderId = null;
+                } else {
+                    newSetFolderId = folders[0].id;
+                    selector.innerHTML = folders.map(f => `
+                        <div class="folder-option ${f.id === newSetFolderId ? 'selected' : ''}" onclick="selectFolder(${f.id})">
+                            📁 ${f.name}
+                        </div>
+                    `).join('');
+                }
             }
             
-            function closeModal() {
-                document.getElementById('createSetModal').classList.remove('active');
+            function showCreateFolderForm() {
+                closeModal('createModal');
+                document.getElementById('createFolderModal').classList.add('active');
+                document.getElementById('newFolderName').value = '';
+                document.getElementById('newFolderName').focus();
+            }
+            
+            function selectFolder(folderId) {
+                newSetFolderId = folderId;
+                document.querySelectorAll('.folder-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                event.target.classList.add('selected');
             }
             
             function selectNewSetLang(lang) {
@@ -398,28 +514,74 @@
                 });
             }
             
+            function createFolder() {
+                const input = document.getElementById('newFolderName');
+                const name = input.value.trim();
+                if (!name) { alert('Введи название папки'); return; }
+                
+                const newFolder = { id: Date.now(), name, emoji: '📁' };
+                folders.push(newFolder);
+                saveFolders();
+                closeModal('createFolderModal');
+                showScreen('list');
+            }
+            
             function createSet() {
                 const input = document.getElementById('newSetName');
                 const name = input.value.trim();
                 if (!name) { alert('Введи название сета'); return; }
+                if (folders.length === 0) { alert('Сначала создай папку'); return; }
                 
-                const newSet = { id: Date.now(), name, lang: newSetLang, words: [] };
+                const newSet = { 
+                    id: Date.now(), 
+                    name, 
+                    lang: newSetLang, 
+                    folderId: newSetFolderId,
+                    words: [] 
+                };
                 sets.push(newSet);
                 activeSetId = newSet.id;
                 saveSets();
-                closeModal();
-                
-                // Сразу показываем экран импорта
+                closeModal('createSetModal');
                 showImportScreen();
+            }
+            
+            function deleteFolder(folderId) {
+                const setsInFolder = sets.filter(s => s.folderId === folderId);
+                if (setsInFolder.length > 0) {
+                    if (!confirm(`В этой папке ${setsInFolder.length} сет(ов). Удалить папку и все сеты внутри?`)) return;
+                    sets = sets.filter(s => s.folderId !== folderId);
+                    saveSets();
+                } else {
+                    if (!confirm('Удалить эту папку?')) return;
+                }
+                
+                folders = folders.filter(f => f.id !== folderId);
+                saveFolders();
+                
+                if (activeSetId && !sets.find(s => s.id === activeSetId)) {
+                    activeSetId = sets.length > 0 ? sets[0].id : null;
+                }
+                
+                showScreen('list');
+            }
+            
+            function deleteSet(setId) {
+                if (!confirm('Удалить этот сет? Все слова будут потеряны.')) return;
+                sets = sets.filter(s => s.id !== setId);
+                if (activeSetId === setId) {
+                    activeSetId = sets.length > 0 ? sets[0].id : null;
+                }
+                saveSets();
+                showScreen('list');
             }
             
             function showImportScreen() {
                 const activeSet = getActiveSet();
                 if (!activeSet) return;
                 
-                // Создаем временный контейнер для импорта
                 const importHTML = `
-                    <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name} · ${LANGS[activeSet.lang].name}</div>
+                    <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div>
                     <div class="import-sources">
                         <div class="source-btn ${importSource === 'text' ? 'active' : ''}" onclick="switchImportSource('text')">
                             <span class="icon">⌨️</span>Вручную
@@ -429,10 +591,9 @@
                         </div>
                     </div>
                     <div id="importBody"></div>
-                    <button class="primary" style="background:#888; margin-top: 20px;" onclick="showScreen('list')">← Перейти к списку</button>
+                    <button class="primary" style="background:#888; margin-top: 20px;" onclick="showScreen('list')">← К списку</button>
                 `;
                 
-                // Показываем импорт вместо списка
                 document.getElementById('list').style.display = 'block';
                 document.getElementById('listContent').innerHTML = importHTML;
                 renderImportBody();
@@ -440,6 +601,10 @@
             
             function getActiveSet() {
                 return sets.find(s => s.id === activeSetId);
+            }
+            
+            function saveFolders() {
+                localStorage.setItem('folders', JSON.stringify(folders));
             }
             
             function saveSets() {
@@ -455,24 +620,22 @@
                 const body = document.getElementById('importBody');
                 if (importSource === 'text') {
                     body.innerHTML = `
-                        <div class="hint">Поддерживаемые форматы:<br>• <code>apple [ˈæp.əl] - яблоко</code><br>• <code>apple /ˈæp.əl/ - яблоко</code><br>• <code>apple - яблоко</code></div>
-                        <textarea id="input" rows="8" placeholder="apple [ˈæp.əl] - яблоко&#10;banana /bəˈnɑːnə/ - банан"></textarea>
+                        <div class="hint">Формат: <code>слово [транскрипция] - перевод</code></div>
+                        <textarea id="input" rows="8" placeholder="apple [ˈæp.əl] - яблоко&#10;banana - банан"></textarea>
                         <button class="primary" onclick="importWords()">Импортировать</button>
                     `;
                 } else {
                     body.innerHTML = `
                         <div class="pdf-drop-zone" onclick="document.getElementById('pdfFile').click()">
                             <div class="icon">📄</div>
-                            <div class="text">Нажми, чтобы выбрать PDF-файл</div>
-                            ${extractedPdfText ? '<div class="filename">✅ Файл загружен</div>' : ''}
+                            <div class="text">Выбери PDF-файл</div>
                         </div>
                         <input type="file" id="pdfFile" accept=".pdf" style="display:none" onchange="handlePdfUpload(event)">
                         <div id="pdfStatus"></div>
                         ${extractedPdfText ? `
-                            <div class="hint">✨ Извлечённый текст. Отредактируй при необходимости.</div>
                             <textarea id="input" rows="10">${extractedPdfText}</textarea>
                             <button class="primary" onclick="importWords()">Импортировать</button>
-                            <button class="primary" style="background:#888;" onclick="clearPdfText()">🗑 Очистить</button>
+                            <button class="primary" style="background:#888;" onclick="clearPdfText()">Очистить</button>
                         ` : ''}
                     `;
                 }
@@ -502,13 +665,12 @@
                             const lineText = sortedItems.map(i => i.str).join(' ');
                             if (lineText.trim()) fullText += lineText.trim() + '\n';
                         });
-                        fullText += '\n';
                     }
                     extractedPdfText = fullText.replace(/\n{3,}/g, '\n\n').trim();
-                    status.innerHTML = `<div class="hint" style="background:#d4edda; color:#155724;">✅ Извлечено ${pdf.numPages} стр.</div>`;
+                    status.innerHTML = `<div class="hint" style="background:#d4edda;">✅ Извлечено ${pdf.numPages} стр.</div>`;
                     renderImportBody();
                 } catch (err) {
-                    status.innerHTML = `<div class="hint" style="background:#f8d7da; color:#721c24;">❌ Ошибка: ${err.message}</div>`;
+                    status.innerHTML = `<div class="hint" style="background:#f8d7da;">❌ Ошибка: ${err.message}</div>`;
                 }
             }
             
@@ -516,9 +678,9 @@
             
             function importWords() {
                 const activeSet = getActiveSet();
-                if (!activeSet) { alert('Выбери сет'); return; }
+                if (!activeSet) return;
                 const input = document.getElementById('input');
-                if (!input) { alert('Сначала загрузи PDF или введи текст'); return; }
+                if (!input) return;
                 
                 const lines = input.value.split('\n');
                 let added = 0;
@@ -527,62 +689,95 @@
                     if (parsed) { activeSet.words.push(parsed); added++; }
                 }
                 
-                if (added === 0) { alert('Не удалось распознать слова. Проверь формат.'); return; }
+                if (added === 0) { alert('Не удалось распознать слова'); return; }
                 saveSets();
                 extractedPdfText = '';
-                alert(`✅ Импортировано слов: ${added}`);
+                alert(`✅ Добавлено слов: ${added}`);
                 showScreen('list');
             }
             
             function renderList() {
                 const container = document.getElementById('listContent');
+                
+                if (folders.length === 0) {
+                    container.innerHTML = '<div class="empty">Нет папок. Нажми "+" чтобы создать первую!</div>';
+                    return;
+                }
+                
                 const activeSet = getActiveSet();
                 
-                if (!activeSet) {
-                    container.innerHTML = '<div class="empty">Нет сетов. Нажми "+" чтобы создать первый!</div>';
-                    return;
+                // Список слов активного сета
+                let wordsHTML = '';
+                if (activeSet && activeSet.words.length > 0) {
+                    wordsHTML = `
+                        <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name} · ${activeSet.words.length} слов</div>
+                        <div class="word-list">
+                            ${activeSet.words.map((w, i) => `
+                                <div class="word-item" id="word-${i}">
+                                    <div class="word-main">
+                                        <span class="word">${w.word}</span>
+                                        ${w.transcription ? `<span class="transcription">[${w.transcription}]</span>` : ''}
+                                        <span class="translation">— ${w.translation}</span>
+                                    </div>
+                                    <div class="actions">
+                                        <button class="action-btn speak" onclick="speak('${w.word.replace(/'/g, "\\'")}')">🔊</button>
+                                        <button class="action-btn" onclick="editWord(${i})">✏️</button>
+                                        <button class="action-btn delete" onclick="deleteWord(${i})">✕</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button class="primary" onclick="showImportScreen()">➕ Добавить слова</button>
+                    `;
+                } else if (activeSet) {
+                    wordsHTML = `
+                        <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div>
+                        <div class="empty">В этом сете пока нет слов<br><br><button class="primary" onclick="showImportScreen()">➕ Добавить слова</button></div>
+                    `;
                 }
                 
-                // Селектор активного сета
-                const setSelector = `
-                    <div class="set-selector" onclick="cycleActiveSet()">
-                        <span class="label">Сет:</span>
-                        <span class="name">${LANGS[activeSet.lang].flag} ${activeSet.name}</span>
-                        <span class="arrow">↻</span>
+                // Папки и сеты
+                const foldersHTML = `
+                    <h3 style="margin-top: 30px; margin-bottom: 15px; color: #333;">Папки и сеты</h3>
+                    <div class="folder-list">
+                        ${folders.map(folder => {
+                            const folderSets = sets.filter(s => s.folderId === folder.id);
+                            return `
+                                <div class="folder">
+                                    <div class="folder-header">
+                                        <div class="folder-name">
+                                            <span class="emoji">${folder.emoji}</span>
+                                            ${folder.name}
+                                        </div>
+                                        <div class="folder-actions">
+                                            <button onclick="deleteFolder(${folder.id})" class="delete">🗑</button>
+                                        </div>
+                                    </div>
+                                    <div class="sets-in-folder">
+                                        ${folderSets.length === 0 ? '<div style="color:#999; font-size:12px;">Пусто</div>' : ''}
+                                        ${folderSets.map(set => `
+                                            <div class="set-item ${set.id === activeSetId ? 'active' : ''}" onclick="selectSet(${set.id})">
+                                                <div class="set-info">
+                                                    <div class="set-name">${LANGS[set.lang].flag} ${set.name}</div>
+                                                    <div class="set-count">${set.words.length} слов</div>
+                                                </div>
+                                                <div class="set-actions">
+                                                    <button class="set-btn delete" onclick="event.stopPropagation(); deleteSet(${set.id})">✕</button>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
                     </div>
                 `;
                 
-                if (activeSet.words.length === 0) {
-                    container.innerHTML = setSelector + `<div class="empty">В этом сете пока нет слов.<br><br><button class="primary" onclick="showImportScreen()">➕ Добавить слова</button></div>`;
-                    return;
-                }
-                
-                container.innerHTML = setSelector + `
-                    <div class="word-list">
-                        ${activeSet.words.map((w, i) => `
-                            <div class="word-item" id="word-${i}">
-                                <div class="word-main">
-                                    <span class="word">${w.word}</span>
-                                    ${w.transcription ? `<span class="transcription">[${w.transcription}]</span>` : ''}
-                                    <span class="translation">— ${w.translation}</span>
-                                </div>
-                                <div class="actions">
-                                    <button class="action-btn speak" onclick="speak('${w.word.replace(/'/g, "\\'")}')">🔊</button>
-                                    <button class="action-btn" onclick="editWord(${i})">✏️</button>
-                                    <button class="action-btn delete" onclick="deleteWord(${i})">✕</button>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <button class="primary" onclick="showImportScreen()">➕ Добавить ещё слова</button>
-                `;
+                container.innerHTML = wordsHTML + foldersHTML;
             }
             
-            function cycleActiveSet() {
-                if (sets.length === 0) return;
-                const currentIndex = sets.findIndex(s => s.id === activeSetId);
-                const nextIndex = (currentIndex + 1) % sets.length;
-                activeSetId = sets[nextIndex].id;
+            function selectSet(setId) {
+                activeSetId = setId;
                 saveSets();
                 renderList();
             }
@@ -592,9 +787,9 @@
                 const word = activeSet.words[index];
                 const item = document.getElementById(`word-${index}`);
                 item.innerHTML = `
-                    <input type="text" class="edit-input" id="edit-word-${index}" value="${word.word}" placeholder="Слово" style="flex:2">
-                    <input type="text" class="edit-input" id="edit-transcription-${index}" value="${word.transcription || ''}" placeholder="Транскрипция" style="flex:2">
-                    <input type="text" class="edit-input" id="edit-translation-${index}" value="${word.translation}" placeholder="Перевод" style="flex:2">
+                    <input type="text" class="edit-input" id="edit-word-${index}" value="${word.word}" placeholder="Слово">
+                    <input type="text" class="edit-input" id="edit-transcription-${index}" value="${word.transcription || ''}" placeholder="Транскрипция">
+                    <input type="text" class="edit-input" id="edit-translation-${index}" value="${word.translation}" placeholder="Перевод">
                     <button class="action-btn" onclick="saveEdit(${index})">💾</button>
                     <button class="action-btn delete" onclick="renderList()">✕</button>
                 `;
@@ -606,7 +801,7 @@
                 const newWord = document.getElementById(`edit-word-${index}`).value.trim();
                 const newTranscription = document.getElementById(`edit-transcription-${index}`).value.trim();
                 const newTranslation = document.getElementById(`edit-translation-${index}`).value.trim();
-                if (!newWord || !newTranslation) { alert('Заполни поля "Слово" и "Перевод"'); return; }
+                if (!newWord || !newTranslation) { alert('Заполни поля'); return; }
                 activeSet.words[index] = { word: newWord, transcription: newTranscription, translation: newTranslation };
                 saveSets();
                 renderList();
@@ -623,13 +818,8 @@
                 const container = document.getElementById('trainContent');
                 const activeSet = getActiveSet();
                 
-                if (!activeSet) {
-                    container.innerHTML = '<div class="empty">Нет сетов. Нажми "+" чтобы создать первый!</div>';
-                    return;
-                }
-                
-                if (activeSet.words.length === 0) {
-                    container.innerHTML = `<div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div><div class="empty">Сначала добавь слова в сет</div>`;
+                if (!activeSet || activeSet.words.length === 0) {
+                    container.innerHTML = '<div class="empty">Сначала добавь слова в сет</div>';
                     return;
                 }
                 
@@ -646,18 +836,18 @@
                 const container = document.getElementById('trainContent');
                 const activeSet = getActiveSet();
                 if (trainIndex >= trainQueue.length) {
-                    container.innerHTML = `<div class="results"><h2>🎉 Тренировка завершена!</h2><div class="label">Ты прошёл все ${trainQueue.length} карточек</div><button class="primary" onclick="startTraining()">🔄 Начать заново</button></div>`;
+                    container.innerHTML = `<div class="results"><h2>🎉 Готово!</h2><div class="label">Пройдено ${trainQueue.length} карточек</div><button class="primary" onclick="startTraining()">🔄 Ещё раз</button></div>`;
                     return;
                 }
                 const currentCard = trainQueue[trainIndex];
                 container.innerHTML = `
                     <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div>
-                    <div class="progress">Карточка ${trainIndex + 1} из ${trainQueue.length}</div>
+                    <div class="progress">${trainIndex + 1} / ${trainQueue.length}</div>
                     <div class="progress-bar"><div class="progress-fill" style="width: ${(trainIndex / trainQueue.length) * 100}%"></div></div>
                     <div class="card" onclick="flipCard()">
                         <button class="speak-btn" onclick="event.stopPropagation(); speak('${currentCard.word.replace(/'/g, "\\'")}')">🔊</button>
                         <div class="front">${currentCard.word}</div>
-                        <div class="back" style="opacity:0.6">👆 Нажми, чтобы увидеть перевод</div>
+                        <div class="back" style="opacity:0.6">👆 Перевернуть</div>
                     </div>
                 `;
             }
@@ -668,7 +858,7 @@
                 const activeSet = getActiveSet();
                 container.innerHTML = `
                     <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div>
-                    <div class="progress">Карточка ${trainIndex + 1} из ${trainQueue.length}</div>
+                    <div class="progress">${trainIndex + 1} / ${trainQueue.length}</div>
                     <div class="progress-bar"><div class="progress-fill" style="width: ${(trainIndex / trainQueue.length) * 100}%"></div></div>
                     <div class="card">
                         <button class="speak-btn" onclick="speak('${currentCard.word.replace(/'/g, "\\'")}')">🔊</button>
@@ -688,13 +878,8 @@
                 const container = document.getElementById('testContent');
                 const activeSet = getActiveSet();
                 
-                if (!activeSet) {
-                    container.innerHTML = '<div class="empty">Нет сетов. Нажми "+" чтобы создать первый!</div>';
-                    return;
-                }
-                
-                if (activeSet.words.length < 4) {
-                    container.innerHTML = `<div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div><div class="empty">Нужно минимум 4 слова в активном сете</div>`;
+                if (!activeSet || activeSet.words.length < 4) {
+                    container.innerHTML = '<div class="empty">Нужно минимум 4 слова</div>';
                     return;
                 }
                 
@@ -702,28 +887,26 @@
                     <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div>
                     <div class="hint">Выбери тип задания (10 вопросов):</div>
                     <div class="test-menu">
-                        <button class="test-option" onclick="startTest(1)"><div class="title">1️⃣ Выбрать перевод</div><div class="desc">Показываем слово — выбери правильный перевод из 4 вариантов</div></button>
-                        <button class="test-option" onclick="startTest(2)"><div class="title">2️⃣ Верный / Неверный</div><div class="desc">Показываем слово и перевод — угадай, правильно ли</div></button>
-                        <button class="test-option" onclick="startTest(3)"><div class="title">3️⃣ Вписать слово</div><div class="desc">Показываем перевод — впиши слово на иностранном языке</div></button>
+                        <button class="test-option" onclick="startTest(1)"><div class="title">1️⃣ Выбрать перевод</div><div class="desc">Выбери правильный перевод из 4 вариантов</div></button>
+                        <button class="test-option" onclick="startTest(2)"><div class="title">2️⃣ Верный / Неверный</div><div class="desc">Угадай, правильно ли показан перевод</div></button>
+                        <button class="test-option" onclick="startTest(3)"><div class="title">3️⃣ Вписать слово</div><div class="desc">Впиши слово по переводу</div></button>
                     </div>
                 `;
             }
             
             function startTest(type) {
-                const activeSet = getActiveSet();
                 currentTestType = type;
                 testPassed = 0;
-                testTotal = Math.min(10, activeSet.words.length);
+                testTotal = Math.min(10, getActiveSet().words.length);
                 testCorrect = 0;
                 answered = false;
                 nextQuestion();
             }
             
             function nextQuestion() {
-                const activeSet = getActiveSet();
                 if (testPassed >= testTotal) { showResults(); return; }
                 answered = false;
-                const correctWord = activeSet.words[Math.floor(Math.random() * activeSet.words.length)];
+                const correctWord = getActiveSet().words[Math.floor(Math.random() * getActiveSet().words.length)];
                 if (currentTestType === 1) renderTest1(correctWord);
                 else if (currentTestType === 2) renderTest2(correctWord);
                 else if (currentTestType === 3) renderTest3(correctWord);
@@ -746,7 +929,7 @@
                 currentQuestion = { correct: correctWord, options: allOptions };
                 container.innerHTML = `
                     <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div>
-                    <div class="progress">Вопрос ${testPassed + 1} из ${testTotal} · Правильных: ${testCorrect}</div>
+                    <div class="progress">${testPassed + 1} / ${testTotal} · ✅ ${testCorrect}</div>
                     <div class="progress-bar"><div class="progress-fill" style="width: ${(testPassed / testTotal) * 100}%"></div></div>
                     <div class="card" style="cursor: default; min-height: 120px;">
                         <button class="speak-btn" onclick="speak('${correctWord.word.replace(/'/g, "\\'")}')">🔊</button>
@@ -760,7 +943,6 @@
                             </button>
                         `).join('')}
                     </div>
-                    <button class="primary" style="background:#888; margin-top: 20px;" onclick="showTestMenu()">← Выйти в меню</button>
                 `;
             }
             
@@ -788,7 +970,7 @@
                 currentQuestion = { correct: correctWord, isTruePair, shownTranslation };
                 container.innerHTML = `
                     <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div>
-                    <div class="progress">Вопрос ${testPassed + 1} из ${testTotal} · Правильных: ${testCorrect}</div>
+                    <div class="progress">${testPassed + 1} / ${testTotal} · ✅ ${testCorrect}</div>
                     <div class="progress-bar"><div class="progress-fill" style="width: ${(testPassed / testTotal) * 100}%"></div></div>
                     <div class="card" style="cursor: default; min-height: 150px;">
                         <button class="speak-btn" onclick="speak('${correctWord.word.replace(/'/g, "\\'")}')">🔊</button>
@@ -799,7 +981,6 @@
                         <button class="btn-fail" onclick="checkTest2(false)">❌ Неверно</button>
                         <button class="btn-success" onclick="checkTest2(true)">✅ Верно</button>
                     </div>
-                    <button class="primary" style="background:#888; margin-top: 20px;" onclick="showTestMenu()">← Выйти в меню</button>
                 `;
             }
             
@@ -809,12 +990,6 @@
                 const isCorrect = userSaysTrue === currentQuestion.isTruePair;
                 if (isCorrect) testCorrect++;
                 testPassed++;
-                const buttons = document.querySelectorAll('.actions-row button');
-                buttons.forEach(b => b.disabled = true);
-                const feedback = document.createElement('div');
-                feedback.className = 'feedback ' + (isCorrect ? 'correct' : 'wrong');
-                feedback.textContent = isCorrect ? '✅ Правильно!' : `❌ Ошибка.`;
-                document.querySelector('#testContent .actions-row').after(feedback);
                 setTimeout(nextQuestion, 1200);
             }
             
@@ -823,15 +998,14 @@
                 currentQuestion = { correct: correctWord };
                 container.innerHTML = `
                     <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div>
-                    <div class="progress">Вопрос ${testPassed + 1} из ${testTotal} · Правильных: ${testCorrect}</div>
+                    <div class="progress">${testPassed + 1} / ${testTotal} · ✅ ${testCorrect}</div>
                     <div class="progress-bar"><div class="progress-fill" style="width: ${(testPassed / testTotal) * 100}%"></div></div>
                     <div class="card" style="cursor: default; min-height: 120px;">
                         <div class="front">${correctWord.translation}</div>
-                        <div class="back" style="opacity:0.7; font-size: 16px;">Впиши слово на иностранном языке</div>
+                        <div class="back" style="opacity:0.7;">Впиши слово</div>
                     </div>
                     <input type="text" class="answer-input" id="answerInput" placeholder="Твой ответ..." autocomplete="off">
                     <button class="primary" onclick="checkTest3()">Проверить</button>
-                    <button class="primary" style="background:#888;" onclick="showTestMenu()">← Выйти в меню</button>
                 `;
                 const input = document.getElementById('answerInput');
                 input.focus();
@@ -850,10 +1024,6 @@
                 input.disabled = true;
                 if (isCorrect) testCorrect++;
                 testPassed++;
-                const feedback = document.createElement('div');
-                feedback.className = 'feedback ' + (isCorrect ? 'correct' : 'wrong');
-                feedback.textContent = isCorrect ? '✅ Правильно!' : `❌ Правильный ответ: ${currentQuestion.correct.word}`;
-                input.after(feedback);
                 setTimeout(nextQuestion, 1500);
             }
             
@@ -861,23 +1031,22 @@
                 const container = document.getElementById('testContent');
                 const activeSet = getActiveSet();
                 const percent = Math.round((testCorrect / testTotal) * 100);
-                let emoji = '🎉', message = 'Отличный результат!';
-                if (percent < 50) { emoji = '💪'; message = 'Нужно ещё попрактиковаться!'; }
+                let emoji = '🎉', message = 'Отлично!';
+                if (percent < 50) { emoji = '💪'; message = 'Нужно ещё практиковаться!'; }
                 else if (percent < 80) { emoji = '👍'; message = 'Хороший результат!'; }
                 container.innerHTML = `
                     <div class="results">
                         <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div>
                         <div style="font-size: 64px;">${emoji}</div>
                         <div class="score">${testCorrect} / ${testTotal}</div>
-                        <div class="label">${percent}% правильных ответов</div>
+                        <div class="label">${percent}% правильно</div>
                         <div class="label" style="margin-top: 10px;">${message}</div>
-                        <button class="primary" onclick="startTest(${currentTestType})">🔄 Пройти ещё раз</button>
-                        <button class="primary" style="background:#888;" onclick="showTestMenu()">← В меню тестов</button>
+                        <button class="primary" onclick="startTest(${currentTestType})">🔄 Ещё раз</button>
+                        <button class="primary" style="background:#888;" onclick="showTestMenu()">← В меню</button>
                     </div>
                 `;
             }
             
-            // Инициализация
             showScreen('list');
         </script>
     </body>
