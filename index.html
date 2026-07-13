@@ -262,13 +262,13 @@
             <h1>Freezlet</h1>
             
             <div class="tabs">
-                <button class="nav-btn" data-screen="list" onclick="showScreen('list')">📋 Список</button>
+                <button class="nav-btn" data-screen="recent" onclick="showScreen('recent')">🕒 Недавние</button>
                 <button class="nav-btn" data-screen="train" onclick="showScreen('train')">🎴 Тренировка</button>
                 <button class="nav-btn" data-screen="test" onclick="showScreen('test')">📝 Тест</button>
                 <button class="nav-btn add-btn" onclick="openCreateModal()">+</button>
             </div>
             
-            <div id="list"><h2>Список слов</h2><div id="listContent"></div></div>
+            <div id="recent"><h2>Недавние сеты</h2><div id="recentContent"></div></div>
             <div id="train"><h2>Тренировка</h2><div id="trainContent"></div></div>
             <div id="test"><h2>Тест</h2><div id="testContent"></div></div>
         </div>
@@ -332,9 +332,9 @@
 
         <nav class="bottom-nav">
             <div class="bottom-nav-items">
-                <button class="bottom-nav-item" data-screen="list" onclick="showScreen('list')">
-                    <span class="icon">📋</span>
-                    <span>Список</span>
+                <button class="bottom-nav-item" data-screen="recent" onclick="showScreen('recent')">
+                    <span class="icon">🕒</span>
+                    <span>Недавние</span>
                 </button>
                 <button class="bottom-nav-item" data-screen="train" onclick="showScreen('train')">
                     <span class="icon">🎴</span>
@@ -389,6 +389,7 @@
                 sets.forEach(s => { 
                     if (!s.lang) s.lang = 'en';
                     if (!s.folderId && folders.length > 0) s.folderId = folders[0].id;
+                    if (!s.createdAt) s.createdAt = Date.now();
                     if (s.words) s.words.forEach(w => { if (!w.transcription) w.transcription = ''; });
                 });
                 if (sets.length > 0) activeSetId = sets[0].id;
@@ -442,7 +443,7 @@
             }
             
             function showScreen(id) {
-                ['list', 'train', 'test'].forEach(screen => {
+                ['recent', 'train', 'test'].forEach(screen => {
                     document.getElementById(screen).style.display = 'none';
                 });
                 document.getElementById(id).style.display = 'block';
@@ -454,7 +455,7 @@
                     }
                 });
                 
-                if (id === 'list') renderList();
+                if (id === 'recent') renderRecent();
                 if (id === 'train') startTraining();
                 if (id === 'test') showTestMenu();
             }
@@ -474,7 +475,6 @@
                 document.getElementById('newSetName').value = '';
                 document.getElementById('newSetName').focus();
                 
-                // Заполняем селектор папок
                 const selector = document.getElementById('folderSelector');
                 if (folders.length === 0) {
                     selector.innerHTML = '<div class="hint">Сначала создай папку</div>';
@@ -523,7 +523,7 @@
                 folders.push(newFolder);
                 saveFolders();
                 closeModal('createFolderModal');
-                showScreen('list');
+                showScreen('recent');
             }
             
             function createSet() {
@@ -537,6 +537,7 @@
                     name, 
                     lang: newSetLang, 
                     folderId: newSetFolderId,
+                    createdAt: Date.now(),
                     words: [] 
                 };
                 sets.push(newSet);
@@ -563,7 +564,7 @@
                     activeSetId = sets.length > 0 ? sets[0].id : null;
                 }
                 
-                showScreen('list');
+                showScreen('recent');
             }
             
             function deleteSet(setId) {
@@ -573,7 +574,7 @@
                     activeSetId = sets.length > 0 ? sets[0].id : null;
                 }
                 saveSets();
-                showScreen('list');
+                showScreen('recent');
             }
             
             function showImportScreen() {
@@ -591,11 +592,11 @@
                         </div>
                     </div>
                     <div id="importBody"></div>
-                    <button class="primary" style="background:#888; margin-top: 20px;" onclick="showScreen('list')">← К списку</button>
+                    <button class="primary" style="background:#888; margin-top: 20px;" onclick="showScreen('recent')">← К недавним</button>
                 `;
                 
-                document.getElementById('list').style.display = 'block';
-                document.getElementById('listContent').innerHTML = importHTML;
+                document.getElementById('recent').style.display = 'block';
+                document.getElementById('recentContent').innerHTML = importHTML;
                 renderImportBody();
             }
             
@@ -693,125 +694,48 @@
                 saveSets();
                 extractedPdfText = '';
                 alert(`✅ Добавлено слов: ${added}`);
-                showScreen('list');
+                showScreen('recent');
             }
             
-            function renderList() {
-                const container = document.getElementById('listContent');
+            function renderRecent() {
+                const container = document.getElementById('recentContent');
                 
-                if (folders.length === 0) {
-                    container.innerHTML = '<div class="empty">Нет папок. Нажми "+" чтобы создать первую!</div>';
+                if (sets.length === 0) {
+                    container.innerHTML = '<div class="empty">Нет сетов. Нажми "+" чтобы создать первый!</div>';
                     return;
                 }
                 
-                const activeSet = getActiveSet();
+                // Сортируем сеты по дате создания (новые сверху)
+                const sortedSets = [...sets].sort((a, b) => b.createdAt - a.createdAt);
                 
-                // Список слов активного сета
-                let wordsHTML = '';
-                if (activeSet && activeSet.words.length > 0) {
-                    wordsHTML = `
-                        <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name} · ${activeSet.words.length} слов</div>
-                        <div class="word-list">
-                            ${activeSet.words.map((w, i) => `
-                                <div class="word-item" id="word-${i}">
-                                    <div class="word-main">
-                                        <span class="word">${w.word}</span>
-                                        ${w.transcription ? `<span class="transcription">[${w.transcription}]</span>` : ''}
-                                        <span class="translation">— ${w.translation}</span>
-                                    </div>
-                                    <div class="actions">
-                                        <button class="action-btn speak" onclick="speak('${w.word.replace(/'/g, "\\'")}')">🔊</button>
-                                        <button class="action-btn" onclick="editWord(${i})">✏️</button>
-                                        <button class="action-btn delete" onclick="deleteWord(${i})">✕</button>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <button class="primary" onclick="showImportScreen()">➕ Добавить слова</button>
-                    `;
-                } else if (activeSet) {
-                    wordsHTML = `
-                        <div class="active-set-badge">${LANGS[activeSet.lang].flag} ${activeSet.name}</div>
-                        <div class="empty">В этом сете пока нет слов<br><br><button class="primary" onclick="showImportScreen()">➕ Добавить слова</button></div>
-                    `;
-                }
-                
-                // Папки и сеты
-                const foldersHTML = `
-                    <h3 style="margin-top: 30px; margin-bottom: 15px; color: #333;">Папки и сеты</h3>
+                container.innerHTML = `
                     <div class="folder-list">
-                        ${folders.map(folder => {
-                            const folderSets = sets.filter(s => s.folderId === folder.id);
-                            return `
-                                <div class="folder">
-                                    <div class="folder-header">
-                                        <div class="folder-name">
-                                            <span class="emoji">${folder.emoji}</span>
-                                            ${folder.name}
-                                        </div>
-                                        <div class="folder-actions">
-                                            <button onclick="deleteFolder(${folder.id})" class="delete">🗑</button>
-                                        </div>
-                                    </div>
-                                    <div class="sets-in-folder">
-                                        ${folderSets.length === 0 ? '<div style="color:#999; font-size:12px;">Пусто</div>' : ''}
-                                        ${folderSets.map(set => `
-                                            <div class="set-item ${set.id === activeSetId ? 'active' : ''}" onclick="selectSet(${set.id})">
-                                                <div class="set-info">
-                                                    <div class="set-name">${LANGS[set.lang].flag} ${set.name}</div>
-                                                    <div class="set-count">${set.words.length} слов</div>
-                                                </div>
-                                                <div class="set-actions">
-                                                    <button class="set-btn delete" onclick="event.stopPropagation(); deleteSet(${set.id})">✕</button>
-                                                </div>
-                                            </div>
-                                        `).join('')}
-                                    </div>
+                        ${sortedSets.map(set => `
+                            <div class="set-item ${set.id === activeSetId ? 'active' : ''}" onclick="selectSet(${set.id})">
+                                <div class="set-info">
+                                    <div class="set-name">${LANGS[set.lang].flag} ${set.name}</div>
+                                    <div class="set-count">${set.words.length} слов · ${new Date(set.createdAt).toLocaleDateString('ru-RU')}</div>
                                 </div>
-                            `;
-                        }).join('')}
+                                <div class="set-actions">
+                                    <button class="set-btn" onclick="event.stopPropagation(); showSetWords(${set.id})">📋</button>
+                                    <button class="set-btn delete" onclick="event.stopPropagation(); deleteSet(${set.id})">✕</button>
+                                </div>
+                            </div>
+                        `).join('')}
                     </div>
                 `;
-                
-                container.innerHTML = wordsHTML + foldersHTML;
+            }
+            
+            function showSetWords(setId) {
+                activeSetId = setId;
+                saveSets();
+                showImportScreen();
             }
             
             function selectSet(setId) {
                 activeSetId = setId;
                 saveSets();
-                renderList();
-            }
-            
-            function editWord(index) {
-                const activeSet = getActiveSet();
-                const word = activeSet.words[index];
-                const item = document.getElementById(`word-${index}`);
-                item.innerHTML = `
-                    <input type="text" class="edit-input" id="edit-word-${index}" value="${word.word}" placeholder="Слово">
-                    <input type="text" class="edit-input" id="edit-transcription-${index}" value="${word.transcription || ''}" placeholder="Транскрипция">
-                    <input type="text" class="edit-input" id="edit-translation-${index}" value="${word.translation}" placeholder="Перевод">
-                    <button class="action-btn" onclick="saveEdit(${index})">💾</button>
-                    <button class="action-btn delete" onclick="renderList()">✕</button>
-                `;
-                document.getElementById(`edit-word-${index}`).focus();
-            }
-            
-            function saveEdit(index) {
-                const activeSet = getActiveSet();
-                const newWord = document.getElementById(`edit-word-${index}`).value.trim();
-                const newTranscription = document.getElementById(`edit-transcription-${index}`).value.trim();
-                const newTranslation = document.getElementById(`edit-translation-${index}`).value.trim();
-                if (!newWord || !newTranslation) { alert('Заполни поля'); return; }
-                activeSet.words[index] = { word: newWord, transcription: newTranscription, translation: newTranslation };
-                saveSets();
-                renderList();
-            }
-            
-            function deleteWord(index) {
-                const activeSet = getActiveSet();
-                activeSet.words.splice(index, 1);
-                saveSets();
-                renderList();
+                renderRecent();
             }
             
             function startTraining() {
@@ -1047,7 +971,7 @@
                 `;
             }
             
-            showScreen('list');
+            showScreen('recent');
         </script>
     </body>
 </html>
